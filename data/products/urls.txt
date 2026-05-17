@@ -1,0 +1,132 @@
+# Product page URLs — one URL per line.
+# Lines starting with '#' are ignored by the ingest pipeline.
+# Verified seed URL (AXIS Q3558-LVE fixed dome network camera):
+https://www.axis.com/products/axis-q3558-lve
+https://www.axis.com/products/axis-q3556-lve
+https://www.axis.com/products/axis-p3288-lve
+https://www.axis.com/products/axis-p3288-lv
+https://www.axis.com/products/axis-p3287-lve
+https://www.axis.com/products/axis-p3287-lv
+https://www.axis.com/products/axis-p3285-lve
+https://www.axis.com/products/axis-p3285-lv
+https://www.axis.com/products/axis-p3278-lve
+https://www.axis.com/products/axis-p3278-lv
+https://www.axis.com/products/axis-p3277-lve
+https://www.axis.com/products/axis-p3277-lv
+https://www.axis.com/products/axis-p3275-v
+https://www.axis.com/products/axis-p3275-lve
+https://www.axis.com/products/axis-p3275-lv
+https://www.axis.com/products/axis-m4228-lve
+https://www.axis.com/products/axis-m4225-lve
+https://www.axis.com/products/axis-m4218-v
+https://www.axis.com/products/axis-m4215-lv
+https://www.axis.com/products/axis-m4215-v
+https://www.axis.com/products/axis-m1075-l-mk-ii
+https://www.axis.com/products/axis-q1728-le
+https://www.axis.com/products/axis-q1728
+https://www.axis.com/products/axis-q1656-le
+https://www.axis.com/products/axis-q1656-dle
+https://www.axis.com/products/axis-q1656
+https://www.axis.com/products/axis-p1518-le
+https://www.axis.com/products/axis-p1388-le
+https://www.axis.com/products/axis-p1387-le
+https://www.axis.com/products/axis-p1387
+https://www.axis.com/products/axis-p1385-e
+https://www.axis.com/products/axis-p1385
+https://www.axis.com/products/axis-q1809-le
+https://www.axis.com/products/axis-q1808-le
+https://www.axis.com/products/axis-q1806-le
+https://www.axis.com/products/axis-q1805-le
+https://www.axis.com/products/axis-q1800-le-3
+https://www.axis.com/products/axis-q1800-le
+https://www.axis.com/products/axis-p1488-le
+https://www.axis.com/products/axis-p1487-le
+https://www.axis.com/products/axis-p1485-le
+https://www.axis.com/products/axis-p1475-le
+https://www.axis.com/products/axis-m2036-le
+https://www.axis.com/products/axis-m2035-le
+https://www.axis.com/products/axis-q6358-le
+https://www.axis.com/products/axis-q6355-le
+https://www.axis.com/products/axis-q6300-e
+https://www.axis.com/products/axis-q6225-le
+https://www.axis.com/products/axis-q6088-e
+https://www.axis.com/products/axis-q6086-e
+https://www.axis.com/products/axis-q6020-e
+https://www.axis.com/products/axis-p5676-le
+https://www.axis.com/products/axis-p5655-e
+https://www.axis.com/products/axis-p5654-e-mk-ii
+https://www.axis.com/products/axis-m5526-e
+https://www.axis.com/products/axis-m5075-g
+https://www.axis.com/products/axis-m5075
+https://www.axis.com/products/axis-m5074
+https://www.axis.com/products/axis-m5000-g
+https://www.axis.com/products/axis-m5000
+https://www.axis.com/products/axis-p3748-plve
+https://www.axis.com/products/axis-p3747-plve
+https://www.axis.com/products/axis-p3738-ple
+https://www.axis.com/products/axis-p3735-ple
+https://www.axis.com/products/axis-p4708-plve
+https://www.axis.com/products/axis-p4707-plve
+https://www.axis.com/products/axis-p4705-plve
+https://www.axis.com/products/axis-q4809-pve
+https://www.axis.com/products/axis-q3839-pve
+https://www.axis.com/products/axis-m4328-p
+https://www.axis.com/products/axis-m4327-p
+https://www.axis.com/products/axis-m4318-plve
+https://www.axis.com/products/axis-m4318-plr
+https://www.axis.com/products/axis-m4317-plve
+https://www.axis.com/products/axis-m4317-plr
+https://www.axis.com/products/axis-m3077-plve
+https://www.axis.com/products/axis-f9104-b-mk-ii-main-unit
+https://www.axis.com/products/axis-f9111-r-mk-ii-main-unit
+https://www.axis.com/products/axis-f9114-b-mk-ii-main-unit
+https://www.axis.com/products/axis-f9114-r-mk-ii-main-unit
+https://www.axis.com/products/axis-f7225-re-pinhole-sensor
+https://www.axis.com/products/axis-f4108-dome-sensor
+https://www.axis.com/products/axis-f4105-lre-dome-sensor
+https://www.axis.com/products/axis-f2137-re-fisheye-sensor
+https://www.axis.com/products/axis-f2135-re-fisheye-sensor
+https://www.axis.com/products/axis-f2115-r-varifocal-sensor
+https://www.axis.com/products/axis-f2108-standard-sensor
+https://www.axis.com/products/axis-f2107-re-standard-sensor
+https://www.axis.com/products/axis-f2105-re-standard-sensor
+https://www.axis.com/products/axis-q1972-e
+https://www.axis.com/products/axis-q1971-e
+https://www.axis.com/products/axis-q1961-te
+https://www.axis.com/products/axis-q2112-e
+https://www.axis.com/products/axis-q2111-e
+https://www.axis.com/products/axis-q2101-te
+https://www.axis.com/products/axis-q8752-e-mk-ii
+# --- Deferred: non-camera products (radar / speaker / access control / intercom) ---
+# Prototype product corpus is scoped to network cameras (decision 2026-05-16):
+# the SPEC §5.3 chunking design is grounded in camera pages, and these pages
+# render specs as datasheet-only links or unlabelled tables. Re-enable once the
+# node builder generalises per product category. See SPEC §11.
+# https://www.axis.com/en-us/products/axis-d2110-ve-security-radar
+# https://www.axis.com/en-us/products/axis-d2210-ve-radar
+# https://www.axis.com/en-us/products/axis-c1410-mk-ii
+# https://www.axis.com/en-us/products/axis-d6310-air-quality-sensor
+# https://www.axis.com/en-us/products/axis-d4200-ve-network-strobe-speaker
+# https://www.axis.com/en-us/products/axis-c1720
+# https://www.axis.com/en-us/products/axis-c1710
+# https://www.axis.com/en-us/products/axis-c1610-ve
+# https://www.axis.com/en-us/products/axis-c1310-e-mk-ii
+# https://www.axis.com/en-us/products/axis-c1511
+# https://www.axis.com/en-us/products/axis-c1510
+# https://www.axis.com/en-us/products/axis-c1111-e
+# https://www.axis.com/en-us/products/axis-c1110-e
+# https://www.axis.com/en-us/products/axis-a1210
+# https://www.axis.com/en-us/products/axis-a1210-b
+# https://www.axis.com/en-us/products/axis-a1610
+# https://www.axis.com/en-us/products/axis-a1610-b
+# https://www.axis.com/en-us/products/axis-a8207-ve-mk-ii
+# https://www.axis.com/en-us/products/axis-i8016-lve
+# https://www.axis.com/en-us/products/axis-i8116-e
+# https://www.axis.com/en-us/products/axis-i8307-ve
+# https://www.axis.com/en-us/products/axis-i7020
+# https://www.axis.com/en-us/products/axis-i7010-ve
+# https://www.axis.com/en-us/products/axis-i7010-ve-safety
+https://www.axis.com/en-us/products/axis-xfq1656
+https://www.axis.com/en-us/products/axis-q1961-xte
+https://www.axis.com/en-us/products/axis-p1468-xle
+
