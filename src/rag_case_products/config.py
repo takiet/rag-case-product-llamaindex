@@ -25,3 +25,8 @@ RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 CONTEXTUAL_SPLIT_THRESHOLD = 1500  # tokens; cascade SentenceSplitter only above this
 SENTENCE_SPLITTER_CHUNK_SIZE = 1024
 SENTENCE_SPLITTER_CHUNK_OVERLAP = 100
+HIERARCHICAL_CHUNK_SIZES = [2048, 512, 128]
+
+# -- PDF cache dirs --
+PRODUCTS_RAW_DIR = PROJECT_ROOT / "data" / "products" / "raw"
+PRODUCTS_PARSED_DIR = PROJECT_ROOT / "data" / "products" / "parsed"

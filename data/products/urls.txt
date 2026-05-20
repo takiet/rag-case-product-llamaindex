@@ -1,132 +1,123 @@
-# Product page URLs — one URL per line.
-# Lines starting with '#' are ignored by the ingest pipeline.
-# Verified seed URL (AXIS Q3558-LVE fixed dome network camera):
-https://www.axis.com/products/axis-q3558-lve
-https://www.axis.com/products/axis-q3556-lve
-https://www.axis.com/products/axis-p3288-lve
-https://www.axis.com/products/axis-p3288-lv
-https://www.axis.com/products/axis-p3287-lve
-https://www.axis.com/products/axis-p3287-lv
-https://www.axis.com/products/axis-p3285-lve
-https://www.axis.com/products/axis-p3285-lv
-https://www.axis.com/products/axis-p3278-lve
-https://www.axis.com/products/axis-p3278-lv
-https://www.axis.com/products/axis-p3277-lve
-https://www.axis.com/products/axis-p3277-lv
-https://www.axis.com/products/axis-p3275-v
-https://www.axis.com/products/axis-p3275-lve
-https://www.axis.com/products/axis-p3275-lv
-https://www.axis.com/products/axis-m4228-lve
-https://www.axis.com/products/axis-m4225-lve
-https://www.axis.com/products/axis-m4218-v
-https://www.axis.com/products/axis-m4215-lv
-https://www.axis.com/products/axis-m4215-v
-https://www.axis.com/products/axis-m1075-l-mk-ii
-https://www.axis.com/products/axis-q1728-le
-https://www.axis.com/products/axis-q1728
-https://www.axis.com/products/axis-q1656-le
-https://www.axis.com/products/axis-q1656-dle
-https://www.axis.com/products/axis-q1656
-https://www.axis.com/products/axis-p1518-le
-https://www.axis.com/products/axis-p1388-le
-https://www.axis.com/products/axis-p1387-le
-https://www.axis.com/products/axis-p1387
-https://www.axis.com/products/axis-p1385-e
-https://www.axis.com/products/axis-p1385
-https://www.axis.com/products/axis-q1809-le
-https://www.axis.com/products/axis-q1808-le
-https://www.axis.com/products/axis-q1806-le
-https://www.axis.com/products/axis-q1805-le
-https://www.axis.com/products/axis-q1800-le-3
-https://www.axis.com/products/axis-q1800-le
-https://www.axis.com/products/axis-p1488-le
-https://www.axis.com/products/axis-p1487-le
-https://www.axis.com/products/axis-p1485-le
-https://www.axis.com/products/axis-p1475-le
-https://www.axis.com/products/axis-m2036-le
-https://www.axis.com/products/axis-m2035-le
-https://www.axis.com/products/axis-q6358-le
-https://www.axis.com/products/axis-q6355-le
-https://www.axis.com/products/axis-q6300-e
-https://www.axis.com/products/axis-q6225-le
-https://www.axis.com/products/axis-q6088-e
-https://www.axis.com/products/axis-q6086-e
-https://www.axis.com/products/axis-q6020-e
-https://www.axis.com/products/axis-p5676-le
-https://www.axis.com/products/axis-p5655-e
-https://www.axis.com/products/axis-p5654-e-mk-ii
-https://www.axis.com/products/axis-m5526-e
-https://www.axis.com/products/axis-m5075-g
-https://www.axis.com/products/axis-m5075
-https://www.axis.com/products/axis-m5074
-https://www.axis.com/products/axis-m5000-g
-https://www.axis.com/products/axis-m5000
-https://www.axis.com/products/axis-p3748-plve
-https://www.axis.com/products/axis-p3747-plve
-https://www.axis.com/products/axis-p3738-ple
-https://www.axis.com/products/axis-p3735-ple
-https://www.axis.com/products/axis-p4708-plve
-https://www.axis.com/products/axis-p4707-plve
-https://www.axis.com/products/axis-p4705-plve
-https://www.axis.com/products/axis-q4809-pve
-https://www.axis.com/products/axis-q3839-pve
-https://www.axis.com/products/axis-m4328-p
-https://www.axis.com/products/axis-m4327-p
-https://www.axis.com/products/axis-m4318-plve
-https://www.axis.com/products/axis-m4318-plr
-https://www.axis.com/products/axis-m4317-plve
-https://www.axis.com/products/axis-m4317-plr
-https://www.axis.com/products/axis-m3077-plve
-https://www.axis.com/products/axis-f9104-b-mk-ii-main-unit
-https://www.axis.com/products/axis-f9111-r-mk-ii-main-unit
-https://www.axis.com/products/axis-f9114-b-mk-ii-main-unit
-https://www.axis.com/products/axis-f9114-r-mk-ii-main-unit
-https://www.axis.com/products/axis-f7225-re-pinhole-sensor
-https://www.axis.com/products/axis-f4108-dome-sensor
-https://www.axis.com/products/axis-f4105-lre-dome-sensor
-https://www.axis.com/products/axis-f2137-re-fisheye-sensor
-https://www.axis.com/products/axis-f2135-re-fisheye-sensor
-https://www.axis.com/products/axis-f2115-r-varifocal-sensor
-https://www.axis.com/products/axis-f2108-standard-sensor
-https://www.axis.com/products/axis-f2107-re-standard-sensor
-https://www.axis.com/products/axis-f2105-re-standard-sensor
-https://www.axis.com/products/axis-q1972-e
-https://www.axis.com/products/axis-q1971-e
-https://www.axis.com/products/axis-q1961-te
-https://www.axis.com/products/axis-q2112-e
-https://www.axis.com/products/axis-q2111-e
-https://www.axis.com/products/axis-q2101-te
-https://www.axis.com/products/axis-q8752-e-mk-ii
-# --- Deferred: non-camera products (radar / speaker / access control / intercom) ---
-# Prototype product corpus is scoped to network cameras (decision 2026-05-16):
-# the SPEC §5.3 chunking design is grounded in camera pages, and these pages
-# render specs as datasheet-only links or unlabelled tables. Re-enable once the
-# node builder generalises per product category. See SPEC §11.
-# https://www.axis.com/en-us/products/axis-d2110-ve-security-radar
-# https://www.axis.com/en-us/products/axis-d2210-ve-radar
-# https://www.axis.com/en-us/products/axis-c1410-mk-ii
-# https://www.axis.com/en-us/products/axis-d6310-air-quality-sensor
-# https://www.axis.com/en-us/products/axis-d4200-ve-network-strobe-speaker
-# https://www.axis.com/en-us/products/axis-c1720
-# https://www.axis.com/en-us/products/axis-c1710
-# https://www.axis.com/en-us/products/axis-c1610-ve
-# https://www.axis.com/en-us/products/axis-c1310-e-mk-ii
-# https://www.axis.com/en-us/products/axis-c1511
-# https://www.axis.com/en-us/products/axis-c1510
-# https://www.axis.com/en-us/products/axis-c1111-e
-# https://www.axis.com/en-us/products/axis-c1110-e
-# https://www.axis.com/en-us/products/axis-a1210
-# https://www.axis.com/en-us/products/axis-a1210-b
-# https://www.axis.com/en-us/products/axis-a1610
-# https://www.axis.com/en-us/products/axis-a1610-b
-# https://www.axis.com/en-us/products/axis-a8207-ve-mk-ii
-# https://www.axis.com/en-us/products/axis-i8016-lve
-# https://www.axis.com/en-us/products/axis-i8116-e
-# https://www.axis.com/en-us/products/axis-i8307-ve
-# https://www.axis.com/en-us/products/axis-i7020
-# https://www.axis.com/en-us/products/axis-i7010-ve
-# https://www.axis.com/en-us/products/axis-i7010-ve-safety
-https://www.axis.com/en-us/products/axis-xfq1656
-https://www.axis.com/en-us/products/axis-q1961-xte
-https://www.axis.com/en-us/products/axis-p1468-xle
-
+https://www.axis.com/dam/public/db/1f/df/datasheet-axis-q3558-lve-dome-camera-en-US-522979.pdf
+https://www.axis.com/dam/public/a2/b1/5c/datasheet-axis-q3556-lve-dome-camera-en-US-522980.pdf
+https://www.axis.com/dam/public/36/7b/ad/datasheet-axis-p3288-lve-dome-camera-en-US-532926.pdf
+https://www.axis.com/dam/public/42/a8/99/datasheet-axis-p3288-lv-dome-camera-en-US-522727.pdf
+https://www.axis.com/dam/public/b1/7a/c1/datasheet-axis-p3287-lve-dome-camera-en-US-532898.pdf
+https://www.axis.com/dam/public/93/34/0d/datasheet-axis-p3287-lv-dome-camera-en-US-522731.pdf
+https://www.axis.com/dam/public/ac/40/67/datasheet-axis-p3285-lve-dome-camera-en-US-532897.pdf
+https://www.axis.com/dam/public/33/69/35/datasheet-axis-p3285-lv-dome-camera-en-US-522729.pdf
+https://www.axis.com/dam/public/dc/bf/b3/datasheet-axis-p3278-lve-dome-camera-en-US-532930.pdf
+https://www.axis.com/dam/public/bd/5e/bf/datasheet-axis-p3278-lv-dome-camera-en-US-521402.pdf
+https://www.axis.com/dam/public/81/5b/d0/datasheet-axis-p3277-lve-dome-camera-en-US-532928.pdf
+https://www.axis.com/dam/public/55/56/00/datasheet-axis-p3277-lv-dome-camera-en-US-521400.pdf
+https://www.axis.com/dam/public/e6/e2/b4/datasheet-axis-p3275-v-dome-camera-en-US-529283.pdf
+https://www.axis.com/dam/public/88/de/ba/datasheet-axis-p3275-lve-dome-camera-en-US-532927.pdf
+https://www.axis.com/dam/public/9c/f4/1e/datasheet-axis-p3275-lv-dome-camera-en-US-535354.pdf
+https://www.axis.com/dam/public/48/41/e0/datasheet-axis-m4228-lve-dome-camera-en-US-522934.pdf
+https://www.axis.com/dam/public/9b/34/4a/datasheet-axis-m4225-lve-dome-camera-en-US-522932.pdf
+https://www.axis.com/dam/public/7b/e6/a0/datasheet-axis-m4218-v-dome-camera-en-US-519781.pdf
+https://www.axis.com/dam/public/72/f1/c3/datasheet-axis-m4215-lv-dome-camera-en-US-519735.pdf
+https://www.axis.com/dam/public/5e/a8/f1/datasheet-axis-m4215-v-dome-camera-en-US-519783.pdf
+https://www.axis.com/dam/public/52/7a/0b/datasheet-axis-m1075-l-mk-ii-box-camera-en-US-531893.pdf
+https://www.axis.com/dam/public/dd/05/75/datasheet-axis-q1728-le-block-camera-en-US-521393.pdf
+https://www.axis.com/dam/public/41/f3/55/datasheet-axis-q1728-block-camera-en-US-521410.pdf
+https://www.axis.com/dam/public/44/e1/34/datasheet-axis-q1656-le-box-camera-en-US-506837.pdf
+https://www.axis.com/dam/public/68/33/c7/datasheet-axis-q1656-dle-radar-video-fusion-camera-en-US-506883.pdf
+https://www.axis.com/dam/public/2f/ad/1a/datasheet-axis-q1656-box-camera-en-US-506838.pdf
+https://www.axis.com/dam/public/7a/d0/57/datasheet-axis-p1518-le-box-camera-en-US-524686.pdf
+https://www.axis.com/dam/public/f0/bd/fb/datasheet-axis-p1388-le-box-camera-en-US-518367.pdf
+https://www.axis.com/dam/public/a7/08/96/datasheet-axis-p1387-le-box-camera-en-US-518377.pdf
+https://www.axis.com/dam/public/88/c3/42/datasheet-axis-p1387-box-camera-en-US-518368.pdf
+https://www.axis.com/dam/public/85/fe/12/datasheet-axis-p1385-e-box-camera-en-US-518376.pdf
+https://www.axis.com/dam/public/26/55/ff/datasheet-axis-p1385-box-camera-en-US-518378.pdf
+https://www.axis.com/dam/public/d7/e5/87/datasheet-axis-q1809-le-bullet-camera-en-US-506873.pdf
+https://www.axis.com/dam/public/a5/5b/d0/datasheet-axis-q1808-le-bullet-camera-en-US-506859.pdf
+https://www.axis.com/dam/public/16/ce/b6/datasheet-axis-q1806-le-bullet-camera-en-US-506860.pdf
+https://www.axis.com/dam/public/6a/63/2f/datasheet-axis-q1805-le-bullet-camera-en-US-506861.pdf
+https://www.axis.com/dam/public/f9/b7/14/datasheet-axis-q1800-le-3-license-plate-verifier-kit-en-US-528069.pdf
+https://www.axis.com/dam/public/a8/84/43/datasheet-axis-q1800-le-license-plate-camera-en-US-509747.pdf
+https://www.axis.com/dam/public/c6/9f/a0/datasheet-axis-p1488–le-bullet-camera-en-US-529499.pdf
+https://www.axis.com/dam/public/6e/20/b0/datasheet-axis-p1487–le-bullet-camera-en-US-529288.pdf
+https://www.axis.com/dam/public/b1/4f/eb/datasheet-axis-p1485–le-bullet-camera-en-US-529287.pdf
+https://www.axis.com/dam/public/0b/7e/54/datasheet-axis-p1475–le-bullet-camera-en-US-529290.pdf
+https://www.axis.com/dam/public/ee/d3/cd/datasheet-axis-m2036-le-bullet-camera-en-US-519726.pdf
+https://www.axis.com/dam/public/ad/5a/53/datasheet-axis-m2035-le-bullet-camera-en-US-519723.pdf
+https://www.axis.com/dam/public/ef/4d/62/datasheet-axis-q6358-le-ptz-camera-en-US-531379.pdf
+https://www.axis.com/dam/public/e9/64/cc/datasheet-axis-q6355-le-ptz-camera-en-US-531380.pdf
+https://www.axis.com/dam/public/9d/aa/73/datasheet-axis-q6300-e-panoramic-camera-en-US-531355.pdf
+https://www.axis.com/dam/public/9c/d8/1d/datasheet-axis-q6225-le-ptz-camera-en-US-506841.pdf
+https://www.axis.com/dam/public/78/e4/b2/datasheet-axis-q6088-e-ptz-camera-en-US-531353.pdf
+https://www.axis.com/dam/public/36/27/e6/datasheet-axis-q6086-e-ptz-camera-en-US-529294.pdf
+https://www.axis.com/dam/public/1d/82/79/datasheet-axis-q6020-e-panoramic-camera-en-US-522813.pdf
+https://www.axis.com/dam/public/b5/20/a9/datasheet-axis-p5676-le-ptz-camera-en-US-506845.pdf
+https://www.axis.com/dam/public/c7/98/93/datasheet-axis-p5655–e-ptz-network-camera-en-US-506802.pdf
+https://www.axis.com/dam/public/0e/14/6d/datasheet-axis-p5654-e-mk-ii-ptz-camera-en-US-506862.pdf
+https://www.axis.com/dam/public/2e/c2/37/datasheet-axis-m5526-e-ptz-camera-en-US-506737.pdf
+https://www.axis.com/dam/public/c3/fb/38/datasheet-axis-m5075-g-ptz-camera-en-US-506698.pdf
+https://www.axis.com/dam/public/d1/6d/a7/datasheet-axis-m5075-ptz-camera-en-US-506699.pdf
+https://www.axis.com/dam/public/60/d7/29/datasheet-axis-m5074-ptz-camera-en-US-506700.pdf
+https://www.axis.com/dam/public/aa/8a/46/datasheet-axis-m5000-g-ptz-camera-en-US-506690.pdf
+https://www.axis.com/dam/public/53/2f/f6/datasheet-axis-m5000-ptz-camera-en-US-506682.pdf
+https://www.axis.com/dam/public/4e/1c/73/datasheet-axis-p3748-plve-panoramic-camera-en-US-509745.pdf
+https://www.axis.com/dam/public/ad/2c/11/datasheet-axis-p3747-plve-panoramic-camera-en-US-509746.pdf
+https://www.axis.com/dam/public/fc/f0/c2/datasheet-axis-p3738-ple-panoramic-camera-en-US-509610.pdf
+https://www.axis.com/dam/public/b0/e4/27/datasheet-axis-p3735-ple-panoramic-camera-en-US-509612.pdf
+https://www.axis.com/dam/public/c7/9c/b3/datasheet-axis-p4708-plve-panoramic-camera-en-US-509673.pdf
+https://www.axis.com/dam/public/31/58/71/datasheet-axis-p4707-plve-panoramic-camera-en-US-509557.pdf
+https://www.axis.com/dam/public/ef/b3/a4/datasheet-axis-p4705-plve-panoramic-camera-en-US-531894.pdf
+https://www.axis.com/dam/public/fa/cf/85/datasheet-axis-q4809-pve-panoramic-camera-en-US-535356.pdf
+https://www.axis.com/dam/public/a2/b5/04/datasheet-axis-q3839-pve-panoramic-camera-en-US-535355.pdf
+https://www.axis.com/dam/public/42/32/d6/datasheet-axis-m4328-p-panoramic-camera-en-US-506724.pdf
+https://www.axis.com/dam/public/99/ec/3a/datasheet-axis-m4327-p-panoramic-camera-en-US-506725.pdf
+https://www.axis.com/dam/public/3d/c9/b8/datasheet-axis-m4318-plve-panoramic-camera-en-US-506692.pdf
+https://www.axis.com/dam/public/42/c1/a4/datasheet-axis-m4318-plr-panoramic-camera-en-US-506706.pdf
+https://www.axis.com/dam/public/83/bd/00/datasheet-axis-m4317-plve-panoramic-camera-en-US-506693.pdf
+https://www.axis.com/dam/public/4e/cf/36/datasheet-axis-m4317-plr-panoramic-camera-en-US-506707.pdf
+https://www.axis.com/dam/public/38/7b/2a/datasheet-axis-m3077-plve-network-camera-en-US-470367.pdf
+https://www.axis.com/dam/public/23/9b/cc/datasheet-axis-f9104-b-mk-ii-main-unit-en-US-534866.pdf
+https://www.axis.com/dam/public/8f/ef/94/datasheet-axis-f9111-r-mk-ii-main-unit-en-US-535286.pdf
+https://www.axis.com/dam/public/93/57/6c/datasheet-axis-f9114-b-mk-ii-main-unit-en-US-534867.pdf
+https://www.axis.com/dam/public/66/11/b0/datasheet-axis-f9114-r-mk-ii-main-unit-en-US-535287.pdf
+https://www.axis.com/dam/public/68/8d/5e/datasheet-axis-f7225-re-pinhole-sensor-en-US-495200.pdf
+https://www.axis.com/dam/public/1f/bc/11/datasheet-axis-f4108-dome-sensor-en-US-501678.pdf
+https://www.axis.com/dam/public/b3/45/dd/datasheet-axis-f4105-lre-dome-sensor-en-US-495201.pdf
+https://www.axis.com/dam/public/6a/b3/36/datasheet-axis-f2137-re-fisheye-sensor-en-US-482145.pdf
+https://www.axis.com/dam/public/ed/88/c4/datasheet-axis-f2135-re-fisheye-sensor-en-US-504513.pdf
+https://www.axis.com/dam/public/40/a1/b7/datasheet-axis-f2115-r-varifocal-sensor-en-US-495204.pdf
+https://www.axis.com/dam/public/a0/ca/d3/datasheet-axis-f2108-standard-sensor-en-US-501737.pdf
+https://www.axis.com/dam/public/e3/a2/f3/datasheet-axis-f2107-re-standard-sensor-en-US-482146.pdf
+https://www.axis.com/dam/public/a4/c1/17/datasheet-axis-f2105-re-standard-sensor-en-US-504514.pdf
+https://www.axis.com/dam/public/4f/af/7e/datasheet-axis-q1972-e-thermal-camera-en-US-522541.pdf
+https://www.axis.com/dam/public/31/1f/9f/datasheet-axis-q1971-e-thermal-camera-en-US-522546.pdf
+https://www.axis.com/dam/public/27/de/0f/datasheet-axis-q1961-te-thermal-camera-en-US-529684.pdf
+https://www.axis.com/dam/public/50/d5/cc/datasheet-axis-q2112-e-thermal-camera-en-US-522545.pdf
+https://www.axis.com/dam/public/8d/49/42/datasheet-axis-q2111-e-thermal-camera-en-US-522544.pdf
+https://www.axis.com/dam/public/ab/33/b8/datasheet-axis-q2101-te-thermal-camera-en-US-528421.pdf
+https://www.axis.com/dam/public/af/b6/86/datasheet-axis-q8752-e-mk-ii-bispectral-ptz-camera-en-US-522536.pdf
+https://www.axis.com/dam/public/bb/68/62/datasheet-axis-d2110-ve-security-radar-en-US-524153.pdf
+https://www.axis.com/dam/public/89/94/3a/datasheet-axis-d2210-ve-radar-en-US-506734.pdf
+https://www.axis.com/dam/public/71/3f/71/datasheet-axis-c1410-mk-ii-network-mini-speaker-en-US-517481.pdf
+https://www.axis.com/dam/public/73/fe/98/datasheet-axis-d6310-air-quality-sensor-en-US-529291.pdf
+https://www.axis.com/dam/public/ce/6e/19/datasheet-axis-d4200-ve-network-strobe-speaker-en-US-521412.pdf
+https://www.axis.com/dam/public/80/9b/ad/datasheet-axis-c1720-network-display-speaker-en-US-533044.pdf
+https://www.axis.com/dam/public/9f/bf/70/datasheet-axis-c1710-network-display-speaker-en-US-533045.pdf
+https://www.axis.com/dam/public/83/10/be/datasheet-axis-c1610-ve-network-sound-projector-en-US-519602.pdf
+https://www.axis.com/dam/public/be/c8/9a/datasheet-axis-c1310-e-mk-ii-network-horn-speaker-en-US-530748.pdf
+https://www.axis.com/dam/public/c5/21/77/datasheet-axis-c1511-network-pendant-speaker-en-US-506701.pdf
+https://www.axis.com/dam/public/68/ca/74/datasheet-axis-c1510-network-pendant-speaker-en-US-506717.pdf
+https://www.axis.com/dam/public/34/70/a1/datasheet-axis-c1111-e-network-cabinet-speaker-en-US-517486.pdf
+https://www.axis.com/dam/public/02/59/56/datasheet-axis-c1110-e-network-cabinet-speaker-en-US-517485.pdf
+https://www.axis.com/dam/public/88/4e/c0/datasheet-axis-a1210-network-door-controller-en-US-529301.pdf
+https://www.axis.com/dam/public/e7/26/b0/datasheet-axis-a1210-b-network-door-controller-en-US-527682.pdf
+https://www.axis.com/dam/public/fe/b4/22/datasheet-axis-a1610-network-door-controller-230207-en-US-527679.pdf
+https://www.axis.com/dam/public/fc/df/08/datasheet-axis-a1610-b-network-door-controller-230207-1-en-US-527680.pdf
+https://www.axis.com/dam/public/7c/b9/e0/datasheet-axis-a8207-ve-mk-ii-network-video-door-station-en-US-522552.pdf
+https://www.axis.com/dam/public/c6/06/04/datasheet-axis-i8016-lve-network-video-intercom-en-US-522551.pdf
+https://www.axis.com/dam/public/be/9a/8c/datasheet-axis-i8116-e-network-video-intercom-en-US-525551.pdf
+https://www.axis.com/dam/public/e3/ea/75/datasheet-axis-i8307-ve-network-intercom-en-US-529300.pdf
+https://www.axis.com/dam/public/4b/b8/b2/datasheet-axis-i7020-network-intercom-en-US-525595.pdf
+https://www.axis.com/dam/public/cf/05/b2/datasheet-axis-i7010-ve-network-intercom-en-US-525594.pdf
+https://www.axis.com/dam/public/06/a3/d5/datasheet-axis-i7010-ve-safety-network-intercom-en-US-525549.pdf
+https://www.axis.com/dam/public/2e/32/86/datasheet-axis-xfq1656-explosion-protected-camera-en-US-506840.pdf
+https://www.axis.com/dam/public/1f/03/25/datasheet-axis-q1961-xte-explosion-protected-thermal-camera-en-US-526906.pdf
+https://www.axis.com/dam/public/de/25/95/datasheet-axis-p1468-xle-explosion-protected-bullet-camera-en-US-526908.pdf

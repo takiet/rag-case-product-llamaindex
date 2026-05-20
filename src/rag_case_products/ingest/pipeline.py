@@ -18,20 +18,23 @@ from llama_index.core import (
     VectorStoreIndex,
     load_index_from_storage,
 )
+from llama_index.core.node_parser import HierarchicalNodeParser, get_leaf_nodes
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 from rag_case_products.config import (
     CASES_STORAGE,
     CASES_URLS,
     EMBED_MODEL,
+    HIERARCHICAL_CHUNK_SIZES,
     PRODUCTS_STORAGE,
     PRODUCTS_URLS,
 )
 from rag_case_products.ingest.contextual import add_contextual_prefixes
-from rag_case_products.ingest.entities import extract_entity
+from rag_case_products.ingest.entities import extract_case, extract_product
 from rag_case_products.ingest.loaders import UrlLoader
 from rag_case_products.ingest.manifest import Manifest
 from rag_case_products.ingest.node_builder import build_nodes
+from rag_case_products.ingest.pdf_loader import PdfProductLoader
 from rag_case_products.models import DocType
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -97,6 +100,13 @@ def _ingest_source(
         storage_context = StorageContext.from_defaults()
         index = VectorStoreIndex(nodes=[], storage_context=storage_context)
 
+    # Instantiate product-specific helpers only when processing the products source.
+    if doc_type == DocType.PRODUCT:
+        _pdf_loader = PdfProductLoader()
+        _hier_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=HIERARCHICAL_CHUNK_SIZES)
+        # Exclude heavy / internal fields from both embedding and LLM prompt rendering.
+        _meta_excluded = ["entity", "content_hash", "fetched_at"]
+
     for url in to_process:
         log.info("[%s] ingesting: %s", name, url)
         try:
@@ -110,12 +120,31 @@ def _ingest_source(
                     except Exception:
                         log.warning("[%s] could not delete doc_id=%s (may not exist)", name, doc_id)
 
-            doc = loader.load(url, doc_type)
-            entity = extract_entity(doc)
-            entity_kind = type(entity).__name__
-            nodes = build_nodes(doc)
-            add_contextual_prefixes(nodes)
-            index.insert_nodes(nodes)
+            if doc_type == DocType.PRODUCT:
+                # PDF path: fetch datasheet → LlamaCloud parse → hierarchical chunking.
+                # extract_product() writes model_name/category/subcategory into doc.metadata;
+                # HierarchicalNodeParser copies doc.metadata to every node it creates, so no
+                # manual per-node loop is needed.
+                doc = _pdf_loader.load(url)
+                entity = extract_product(doc)
+                entity_kind = type(entity).__name__
+                all_nodes = _hier_parser.get_nodes_from_documents([doc])
+                leaf_nodes = get_leaf_nodes(all_nodes)
+                for node in all_nodes:
+                    node.excluded_embed_metadata_keys = _meta_excluded
+                    node.excluded_llm_metadata_keys = _meta_excluded
+                storage_context.docstore.add_documents(all_nodes)
+                index.insert_nodes(leaf_nodes)
+                index_nodes = leaf_nodes
+            else:
+                # Case path: HTML via MarkItDown → semantic node builder → contextual prefixes.
+                doc = loader.load(url, doc_type)
+                entity = extract_case(doc)
+                entity_kind = type(entity).__name__
+                nodes = build_nodes(doc)
+                add_contextual_prefixes(nodes)
+                index.insert_nodes(nodes)
+                index_nodes = nodes
 
             # Persist before recording in the manifest so a crash between these
             # two writes leaves the URL unrecorded (re-ingested on next run) rather
@@ -126,11 +155,11 @@ def _ingest_source(
                 url=url,
                 content_hash=doc.metadata["content_hash"],
                 doc_id=doc.id_,
-                node_ids=[n.node_id for n in nodes],
+                node_ids=[n.node_id for n in index_nodes],
                 entity_kind=entity_kind,
             )
             manifest.save()
-            log.info("[%s] done: %d nodes from %s", name, len(nodes), url)
+            log.info("[%s] done: %d nodes from %s", name, len(index_nodes), url)
         except Exception as exc:
             log.error("[%s] failed to ingest %s: %s", name, url, exc)
 

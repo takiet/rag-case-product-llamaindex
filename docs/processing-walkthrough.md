@@ -3,6 +3,11 @@
 > Companion to `SPEC.md`. `SPEC.md` is the *design*; this document traces what the
 > *implemented code* actually does, one step at a time, following a real piece of
 > data through every transformation. Line references point at the current source.
+>
+> **Note:** The product ingest path was redesigned. Products now use PDF datasheets
+> parsed by LlamaCloud + `HierarchicalNodeParser` + `AutoMergingRetriever`.
+> Cases are unchanged. Sections that differ per source are labelled **(products)**
+> or **(cases)**.
 
 The system has **two independent pipelines**. They never run at the same time and
 they only meet at one place — the persisted index on disk.
@@ -127,7 +132,35 @@ fetching or writing anything (`pipeline.py:79-83`).
 
 ## Step 2 — Load: URL → Markdown → `Document`
 
-`ingest/loaders.py`, `UrlLoader.load(url, doc_type)`.
+### Step 2 (products) — `ingest/pdf_loader.py`, `PdfProductLoader.load(pdf_url)`
+
+`data/products/urls.txt` already contains direct PDF datasheet URLs. The loader runs three sub-steps:
+
+1. **Download** (`download_pdf`): HTTP GET the PDF, write to
+   `data/products/raw/<sha256(url)[:16]>.pdf`. Cache hit → return immediately.
+2. **Parse** (`parse_pdf_to_markdown`): upload the PDF to LlamaCloud, request
+   agentic-tier parsing, join the returned page-level markdown, strip Axis copyright
+   and `www.axis.com` noise. Write result to `data/products/parsed/<stem>.md`.
+   Cache hit → return the file content without calling LlamaCloud.
+3. **Wrap in Document**:
+
+```python
+Document(
+    text    = "<clean datasheet markdown>",
+    id_     = "6a122cd836b758d2",       # sha256(pdf_url)[:16]
+    metadata = {
+        "doc_type":     "product",
+        "source":       "https://www.axis.com/dam/public/.../datasheet-axis-q3558-lve-…pdf",
+        "fetched_at":   "2026-05-20T…+00:00",
+        "content_hash": "<sha256 of markdown>",
+    },
+)
+```
+
+If LlamaCloud returns no markdown or all pages fail, `parse_pdf_to_markdown` raises
+`RuntimeError` — the URL is logged and skipped, the manifest is not updated.
+
+### Step 2 (cases) — `ingest/loaders.py`, `UrlLoader.load(url, doc_type)`
 
 `markitdown` fetches the HTML page and converts it to Markdown locally — no API
 key, no LLM. The result is wrapped in a LlamaIndex `Document`:
@@ -137,23 +170,14 @@ Document(
     text    = "<the whole page as markdown>",
     id_     = "d8c75a60d1da2021",        # sha256(url)[:16]  — stable, URL-derived
     metadata = {
-        "doc_type":     "product",
-        "source":       "https://www.axis.com/products/axis-q3558-lve",
-        "title":        "AXIS Q3558-LVE Dome Camera | Axis Communications",
+        "doc_type":     "case",
+        "source":       "https://www.axis.com/customer-story/…",
+        "title":        "…",
         "fetched_at":   "2026-05-16T12:27:52...+00:00",
-        "content_hash": "9e3edf416a4b89a1bbaaead2d5eb20bb693da4e86e999f089291ec773c64ae6b",
+        "content_hash": "<sha256 of markdown>",
     },
 )
 ```
-
-Two design points:
-
-- **`id_` is `sha256(url)[:16]`** — deterministic. The same URL always yields the
-  same `doc_id`, which is what lets `--force` find and delete a previous version's
-  nodes. (The value `d8c75a60d1da2021` is the real `doc_id` recorded for this URL
-  in `storage/products/manifest.json`.)
-- **`content_hash` is `sha256(markdown)`** — reserved for a future "URL unchanged
-  but content changed" check. Currently it is only stored, not compared.
 
 The raw Markdown at this point still contains the whole page: a large block of
 site-navigation chrome, then the real content starting at the first `# ` (H1).
@@ -213,106 +237,91 @@ SPEC §4.4):
 (For a case page `extract_case` instead copies `title`, `industry`, `customer`,
 `region`, `deployment_year`.)
 
-## Step 4 — Node build: one `Document` → many typed `TextNode`s
+## Step 4 — Node build: one `Document` → many `TextNode`s
 
-`ingest/node_builder.py`, `build_nodes(doc)` → dispatches to
-`build_product_nodes` / `build_case_nodes`.
+### Step 4 (products) — `pipeline.py`, `HierarchicalNodeParser`
 
-A whole product page is too coarse to embed as one vector — a query about
-"operating temperature" would be diluted by marketing prose. So the page is split
-into many small, **typed** nodes. Each node carries a `node_kind` so retrieval and
-debugging can tell *what* a chunk is.
-
-### 4a. The card node — built from the entity, not the page
-
-`_build_product_card()` ignores the page text and renders the extracted entity
-into a fixed template:
-
-```
-Model: AXIS Q3558-LVE
-Category: network_camera
-Subcategory: dome
-Resolution: 8 MP
-FOV horizontal: 104.0 - 48.9 °
-IP rating: IK10, IP66, IP6K9K, NEMA 4X
-Operating temperature: -50 °C to 55 °C
-
-The AXIS Q3558-LVE is an advanced 8 MP AI-powered dome camera designed for
-outdoor security. ...
+```python
+parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 512, 128])
+all_nodes = parser.get_nodes_from_documents([doc])
+leaf_nodes = get_leaf_nodes(all_nodes)
 ```
 
-This single, dense node is the "identity card" of the product — the one chunk
-most likely to answer "tell me about model X". A case page gets the analogous
-`case_card`.
+The parser creates a three-level hierarchy in a single pass:
 
-### 4b. The other nodes — built by splitting the page on headings
+| Level | Token budget | What it contains |
+|---|---|---|
+| Parent | 2048 | A ~half-page section — chapter-level context |
+| Child | 512 | A paragraph or spec block |
+| Leaf | 128 | A few sentences — the unit that gets embedded |
+
+All nodes at every level automatically inherit `doc.metadata` (including
+`model_name`, `category`, `subcategory` written by Step 3). Heavy fields are then
+excluded from embedding and LLM rendering:
+
+```python
+for node in all_nodes:
+    node.excluded_embed_metadata_keys = ["entity", "content_hash", "fetched_at"]
+    node.excluded_llm_metadata_keys   = ["entity", "content_hash", "fetched_at"]
+```
+
+`model_name`, `category`, and `source` remain visible to both the embedding model
+and the LLM, providing product identity without polluting the vector with large blobs.
+
+**Storage split:**
+
+- `storage_context.docstore.add_documents(all_nodes)` — registers **all** nodes.
+- `index.insert_nodes(leaf_nodes)` — embeds **only leaf nodes**.
+
+`AutoMergingRetriever` queries the vector index (leaves), then looks up parent nodes
+from the docstore when the merge threshold is met.
+
+### Step 4 (cases) — `ingest/node_builder.py`, `build_case_nodes(doc)`
 
 The page Markdown is split on `## ` (H2) headings by `_split_by_heading()`. Each
 section is routed by its heading:
 
 | Heading on the page | → `node_kind` | Notes |
 |---|---|---|
-| "Outstanding image quality", "ARTPEC-9 …" | `prose` | one node per H2 |
-| "Technical specifications" | `spec` | re-split per spec subgroup (see below) |
-| "Analytics" | `analytics` | one node |
-| "How to buy" → "Part numbers" sub-block | `procurement` | one node |
-| "Accessories", "Support and resources", footer/menus | **skipped** | navigational noise — never embedded |
+| *(intro text before first H2)* | `case_section` (intro) | one node |
+| "The challenge", "The solution", etc. | `case_section` | one node per H2 |
+| "Products & solutions" | `case_products` | one node |
+| "Our partner organizations" | `case_partners` | standalone if ≥ 2 partners |
+| "You may also be interested in", "Get in touch", footer/menus | **skipped** | navigational noise |
 
-The **`spec` split is special**. markitdown renders "Technical specifications" as
-bare label lines ("Camera", "Video", "Lens" …) each followed by a Markdown table —
-there are no `###` headings to split on. `_split_spec_body()` (`node_builder.py:167`)
-detects a label line as a non-empty line that does *not* start with `|`, `[`, `#`,
-or `-`, and starts a new subgroup there. The Q3558-LVE page yields ~10 `spec`
-nodes, one per subgroup.
+The `case_card` is built from the extracted entity (Step 3) into a fixed template,
+not from page text. Every node carries `doc_id`, `source`, `node_kind`, filter keys,
+and a `NodeRelationship.SOURCE` pointing at the parent `doc_id` (enables
+`--force` deletion via `index.delete_ref_doc(doc_id)`).
 
-A real `spec` node (subgroup "Camera", from a sibling product page):
+Cascading split: a case node exceeding ~1500 tokens is split with
+`SentenceSplitter(chunk_size=1024, chunk_overlap=100)`.
 
-```
-| Property description | | Property value |
-| --- | --- | --- |
-| Image sensor | CMOS |
-| Image sensor size | 1/1.8" |
-| Lightfinder | Lightfinder 2.0 |
-| Wide dynamic range | Forensic WDR |
-| Min illumination/ light sensitivity (Color) | 0.11 lux |
-| Min illumination/ light sensitivity (B/W) | 0 lux |
-```
+**Result:** 7–9 typed nodes per case study URL.
 
-### 4c. Every node gets a metadata envelope
-
-`_base_metadata()` stamps every node with `doc_id`, `source`, `node_kind`, the
-filter keys from Step 3, and a `section_path`. `_make_node()` also sets a
-`NodeRelationship.SOURCE` pointing at the parent `doc_id` — this is what groups a
-URL's nodes so `--force` can delete them all via `index.delete_ref_doc(doc_id)`
-(Phase 2 Review, bug 2).
-
-### 4d. Cascading split — only if a node is too big
-
-`_maybe_split()` (`node_builder.py:149`): a node under ~1500 tokens
-(`CONTEXTUAL_SPLIT_THRESHOLD`, estimated at 4 chars/token) is kept whole. Only an
-oversized node is passed through `SentenceSplitter(chunk_size=1024,
-chunk_overlap=100)`. Most heading sections are small, so this rarely fires — it is
-a safety valve, not the primary splitter.
-
-**Result for Q3558-LVE:** 16 typed nodes (1 `card` + several `prose` + ~10 `spec`
-+ `analytics` + `procurement`). The committed `manifest.json` lists exactly 16
-`node_ids` for this URL.
-
-## Step 5 — Contextual prefix: make each node self-describing
+## Step 5 — Contextual prefix: make each node self-describing (cases only)
 
 `ingest/contextual.py`, `add_contextual_prefixes(nodes)`.
 
-**The problem it solves:** a bare `spec` node is a table of numbers. Embedded
-alone, it is hard to retrieve — nothing in `| Image sensor | CMOS |` says *which
-product* or *what kind of section* this is. **Contextual retrieval** fixes that by
-prepending context to every node *before* embedding.
+> **Products skip this step.** Product leaf nodes already carry `model_name`,
+> `category`, and `source` in their inherited metadata, and the hierarchical
+> structure from Step 4 provides the surrounding context. `add_contextual_prefixes`
+> is called only for case nodes.
 
-For each node, two things are prepended:
+**The problem it solves for cases:** a bare section node — e.g. a paragraph from
+"The challenge" section — has nothing in its text to indicate *which* case study or
+*what industry* it describes. **Contextual retrieval** fixes that by prepending
+context to every node *before* embedding.
 
-1. **A structured header line** built from metadata (`_build_product_prefix`):
+For each case node, two things are prepended:
+
+1. **A structured header line** built from metadata (`_build_case_prefix`):
 
    ```
-   [Product: AXIS Q3558-LVE | Category: network_camera/dome | Section: card | Kind: card]
+   [Case: A lesson in creating a cohesive, modern surveillance system |
+    Customer: Knoch School District | Industry: education |
+    Region: Pennsylvania, United States | Year: 2026 |
+    Section: case_section | Kind: case_section]
    ```
 
 2. **A 1–2 sentence LLM summary** of the chunk. `gpt-4o-mini` is told to summarise
@@ -333,29 +342,23 @@ excluding the metadata keys, LlamaIndex's `MetadataMode.EMBED` would *also* prep
 every metadata value — including `original_text`, the entire body again — and the
 embedding would be computed over duplicated, polluted text (Phase 2 Review, bug B2).
 
-**Worked example — the Q3558-LVE `card` node after Step 5** (verbatim from
-`storage/products/docstore.json`):
+**Worked example — a Knoch School District `case_section` node after Step 5:**
 
 ```
-[Product: AXIS Q3558-LVE | Category: network_camera/dome | Section: card | Kind: card]
-The AXIS Q3558-LVE is an 8 MP dome network camera with a horizontal field of view
-of 104.0 - 48.9°, an IP rating of IK10, IP66, IP6K9K, and an operating temperature
-range of -50 °C to 55 °C. It is designed for outdoor security applications.
+[Case: A lesson in creating a cohesive, modern surveillance system |
+ Customer: Knoch School District | Industry: education |
+ Region: Pennsylvania, United States | Year: 2026 |
+ Section: case_section | Kind: case_section]
+Knoch School District replaced its outdated analog cameras with 150 high-resolution
+Axis cameras, integrating them with existing door-control systems.
 
-Model: AXIS Q3558-LVE
-Category: network_camera
-Subcategory: dome
-Resolution: 8 MP
-FOV horizontal: 104.0 - 48.9 °
-IP rating: IK10, IP66, IP6K9K, NEMA 4X
-Operating temperature: -50 °C to 55 °C
-
-The AXIS Q3558-LVE is an advanced 8 MP AI-powered dome camera designed for outdoor
-security. ...
+## The solution
+An end-to-end Axis solution was implemented. The district worked with
+system integrator ... to install 150 IP cameras ...
 ```
 
-The first three lines are the contextual prefix; everything below is the original
-card body, also kept verbatim in `metadata["original_text"]`.
+The header lines are the contextual prefix; everything below is the original section
+body, also kept verbatim in `metadata["original_text"]`.
 
 ## Step 6 — Embed & persist
 
@@ -527,22 +530,26 @@ The agent (an LLM loop) reads the system prompt + user message and decides which
 tool(s) to call. For the Pattern B query it calls `search_products` once.
 
 A single `search_products("AXIS Q3558-LVE operating temperature range")` call runs
-the full **retrieve → rerank → synthesize** chain configured in `tools.py:27-30`:
+the full **retrieve → merge → rerank → synthesize** chain configured in `tools.py`:
 
 ```
 1. EMBED      the query string with text-embedding-3-small.
-2. RETRIEVE   similarity_top_k = 8  → 8 nearest nodes by cosine similarity
-              (config.py SIMILARITY_TOP_K). The query is matched against the
-              CONTEXTUAL-PREFIXED node text — this is where Step 5 pays off:
-              the Q3558-LVE `card` and `spec` nodes both name the model and
-              the operating-temperature value, so they rank high.
-3. RERANK     SentenceTransformerRerank("cross-encoder/ms-marco-MiniLM-L-6-v2")
-              re-scores all 8 nodes against the query and keeps top_n = 4
-              (config.py RERANK_TOP_N). A cross-encoder reads query+node
-              together, so it is sharper than the bi-encoder similarity used
-              for retrieval — but too slow to run over the whole index, hence
-              "retrieve 8 cheaply, rerank to 4 precisely".
-4. SYNTHESIZE the query engine sends those 4 nodes to gpt-4o-mini and gets a
+2. RETRIEVE   similarity_top_k = 8  → 8 nearest leaf nodes by cosine similarity
+              (config.py SIMILARITY_TOP_K). Leaf nodes carry model_name, category,
+              and source in metadata (inherited from the Document in Step 4), so
+              product-identity context is present in every vector even though the
+              text itself is a short 128-token chunk.
+3. MERGE      AutoMergingRetriever checks each retrieved leaf against its parent:
+              if enough sibling leaves were retrieved, the parent node (512 or 2048
+              tokens) is substituted. This surfaces broader context (e.g. a whole
+              spec section) when multiple nearby leaves all matched the query.
+4. RERANK     SentenceTransformerRerank("cross-encoder/ms-marco-MiniLM-L-6-v2")
+              re-scores the merged candidate set against the query and keeps
+              top_n = 4 (config.py RERANK_TOP_N). A cross-encoder reads
+              query+node together — sharper than bi-encoder similarity, but too
+              slow over the full index, hence "retrieve 8 cheaply, rerank to 4
+              precisely".
+5. SYNTHESIZE the query engine sends those 4 nodes to gpt-4o-mini and gets a
               short natural-language answer for THIS tool call.
 ```
 
@@ -688,27 +695,60 @@ on its own inside `run_agent`.
 
 # Appendix A — Anatomy of one node
 
-Every searchable unit in the system is a `TextNode`. Putting Steps 4–6 together,
-one finished node looks like this:
+Every searchable unit in the system is a `TextNode`. The shape differs between
+products (hierarchical, no contextual prefix) and cases (semantic, with prefix).
+
+### Product leaf node (after Steps 4 and 6)
 
 ```
 TextNode(
   id_  = "d46ce3fb-274e-4fde-97f9-b839e5c00201",     # random uuid4
-  text = "[Product: AXIS Q3558-LVE | Category: network_camera/dome | "
-         "Section: card | Kind: card]\n"
-         "<1-2 sentence LLM summary>\n\n"
-         "<original card body>",                      # ← embedded as a vector
+  text = "Sensor: 1/1.2 progressive scan RGB CMOS\n"
+         "Resolution: Up to 3840×2160\n"
+         "Lens: Varifocal, F1.6",                     # ← raw 128-token chunk, no prefix
   metadata = {
-    "doc_id":        "d8c75a60d1da2021",              # parent document
-    "source":        "https://www.axis.com/products/axis-q3558-lve",
-    "node_kind":     "card",                          # card|prose|spec|analytics|…
-    "section_path":  "card",
     "doc_type":      "product",
-    "model_name":    "AXIS Q3558-LVE",                # filter keys (Step 3)
+    "source":        "https://www.axis.com/dam/public/.../datasheet-q3558-lve.pdf",
+    "model_name":    "AXIS Q3558-LVE",                # inherited from Document (Step 3)
     "category":      "network_camera",
     "subcategory":   "dome",
-    "title":         "AXIS Q3558-LVE Dome Camera | Axis Communications",
-    "original_text": "Model: AXIS Q3558-LVE\nCategory: ...",   # prefix-free body
+    "content_hash":  "9e3edf41…",                    # excluded from embed + LLM
+    "fetched_at":    "2026-05-20T…+00:00",            # excluded from embed + LLM
+    "entity":        "{\"model_name\": …}",           # excluded from embed + LLM
+  },
+  relationships = {
+    SOURCE: "<document id>",
+    PARENT: "<child node id>",                        # child is the 512-token parent
+  },
+  excluded_embed_metadata_keys = ["entity", "content_hash", "fetched_at"],
+  excluded_llm_metadata_keys   = ["entity", "content_hash", "fetched_at"],
+)
+```
+
+Parent and child nodes at higher levels (512 and 2048 tokens) have the same metadata
+and exclusion settings. `AutoMergingRetriever` may return a parent node instead of
+a leaf when enough sibling leaves matched the query.
+
+### Case node (after Steps 4, 5, and 6)
+
+```
+TextNode(
+  id_  = "8044c3d5-f590-4b21-b2d6-1e9b3a7f0c22",
+  text = "[Case: A lesson in creating … | Customer: Knoch School District | "
+         "Industry: education | Region: Pennsylvania… | Year: 2026 | "
+         "Section: case_section | Kind: case_section]\n"
+         "<1-2 sentence LLM summary>\n\n"
+         "<original section body>",                   # ← contextual prefix + body
+  metadata = {
+    "doc_id":        "d8c75a60d1da2021",
+    "source":        "https://www.axis.com/customer-story/knoch-school-acs",
+    "node_kind":     "case_section",
+    "doc_type":      "case",
+    "title":         "A lesson in creating a cohesive, modern surveillance system",
+    "industry":      "education",
+    "customer":      "Knoch School District",
+    "region":        "Pennsylvania, United States",
+    "original_text": "<prefix-free section body>",    # preserved for display
   },
   relationships = { SOURCE: "d8c75a60d1da2021" },     # enables --force delete
   excluded_embed_metadata_keys = [<all metadata keys>],
@@ -716,34 +756,39 @@ TextNode(
 )
 ```
 
-`node_kind` values: `card`, `prose`, `spec`, `analytics`, `procurement`
-(products); `case_card`, `case_section`, `case_products`, `case_partners` (cases).
+`node_kind` values (cases): `case_card`, `case_section`, `case_products`, `case_partners`.
 
 # Appendix B — Where each step lives in the code
 
-| Step | Module | Key function |
+| Step | Module | Key function / note |
 |---|---|---|
 | **Ingest** | | |
 | CLI parse | `cli.py` | `_build_parser`, `main` |
 | Orchestration | `ingest/pipeline.py` | `build_and_persist_indices`, `_ingest_source` |
 | 1 — manifest / skip | `ingest/manifest.py` | `Manifest.is_new`, `record`, `save` |
-| 2 — load | `ingest/loaders.py` | `UrlLoader.load` |
-| 3 — entity extract | `ingest/entities.py` | `extract_entity` |
-| 4 — node build | `ingest/node_builder.py` | `build_nodes`, `_split_by_heading`, `_split_spec_body` |
-| 5 — contextual prefix | `ingest/contextual.py` | `add_contextual_prefixes` |
-| 6 — embed & persist | `ingest/pipeline.py` | `index.insert_nodes`, `storage_context.persist` |
+| 2 (products) — PDF load | `ingest/pdf_loader.py` | `PdfProductLoader.load`, `download_pdf`, `parse_pdf_to_markdown` |
+| 2 (cases) — HTML load | `ingest/loaders.py` | `UrlLoader.load` |
+| 3 — entity extract | `ingest/entities.py` | `extract_product`, `extract_case` |
+| 4 (products) — hierarchical chunk | `ingest/pipeline.py` | `HierarchicalNodeParser`, `get_leaf_nodes` |
+| 4 (cases) — semantic node build | `ingest/node_builder.py` | `build_case_nodes`, `_split_by_heading` |
+| 5 (cases only) — contextual prefix | `ingest/contextual.py` | `add_contextual_prefixes` |
+| 6 (products) — embed & persist | `ingest/pipeline.py` | `docstore.add_documents(all_nodes)`, `index.insert_nodes(leaf_nodes)` |
+| 6 (cases) — embed & persist | `ingest/pipeline.py` | `index.insert_nodes(nodes)`, `storage_context.persist` |
 | **Query** | | |
 | UI | `app.py` | `on_chat_start`, `on_message` |
 | Workflow | `workflow/rag_workflow.py` | `RagWorkflow` |
 | 1 — analyze | `workflow/rag_workflow.py` | `analyze_query` |
 | 2 — agent | `workflow/rag_workflow.py` | `run_agent` |
 | Tools | `retrieval/tools.py` | `build_tools` |
-| Index load | `retrieval/indices.py` | `load_products_index`, `load_cases_index` |
+| Index load (products) | `retrieval/indices.py` | `load_products_index` → `(VectorStoreIndex, StorageContext)` |
+| Index load (cases) | `retrieval/indices.py` | `load_cases_index` → `VectorStoreIndex` |
+| Products retriever | `retrieval/tools.py` | `AutoMergingRetriever` + `RetrieverQueryEngine` |
+| Cases retriever | `retrieval/tools.py` | `VectorStoreIndex.as_query_engine` |
 | Rerank | `retrieval/reranker.py` | `build_reranker` |
 | 3 — synthesize | `workflow/rag_workflow.py` | `synthesize` |
 | Events | `workflow/events.py` | `QueryAnalyzedEvent`, `AgentDoneEvent`, `ProgressEvent` |
 | Data models | `models.py` | `Product`, `CaseStudy`, `QueryAnalysis`, `AnswerBundle`, … |
-| Config | `config.py` | model names, paths, `SIMILARITY_TOP_K`, `RERANK_TOP_N` |
+| Config | `config.py` | model names, paths, `SIMILARITY_TOP_K`, `RERANK_TOP_N`, `HIERARCHICAL_CHUNK_SIZES` |
 
 # Appendix C — Models and tunable parameters
 
@@ -754,7 +799,15 @@ TextNode(
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` | `config.py RERANK_MODEL` | re-score retrieved nodes (CPU/MPS) |
 | `SIMILARITY_TOP_K` | 8 | `config.py` | nodes retrieved per tool call before rerank |
 | `RERANK_TOP_N` | 4 | `config.py` | nodes kept after rerank |
-| `CONTEXTUAL_SPLIT_THRESHOLD` | ~1500 tokens | `config.py` | cascade-split a node only above this size |
+| `HIERARCHICAL_CHUNK_SIZES` | `[2048, 512, 128]` | `config.py` | parent/child/leaf token budgets for product nodes |
+| `CONTEXTUAL_SPLIT_THRESHOLD` | ~1500 tokens | `config.py` | cascade-split a case node only above this size |
 | Entity page window | 6000 chars | `entities.py` | page text shown to the extractor |
-| Summary chunk window | 3000 chars | `contextual.py` | chunk text shown to the summariser |
+| Summary chunk window | 3000 chars | `contextual.py` | case chunk text shown to the summariser |
 | Workflow timeout | 120 s | `app.py` | `RagWorkflow(timeout=120)` |
+
+**Environment variables required:**
+
+| Variable | Used by |
+|---|---|
+| `OPENAI_API_KEY` | LLM (entity extraction, analysis, synthesis) + embedding model |
+| `LLAMA_CLOUD_API_KEY` | `parse_pdf_to_markdown` — LlamaCloud agentic PDF parse (products only) |

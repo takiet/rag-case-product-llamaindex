@@ -1,53 +1,10 @@
-"""Tests for ingest/node_builder.py — node kinds and counts from inline fixtures."""
+"""Tests for ingest/node_builder.py — case study node kinds and counts."""
 
 import json
 
 from llama_index.core.schema import Document
 
-from rag_case_products.ingest.node_builder import build_case_nodes, build_nodes, build_product_nodes
-
-_PRODUCT_ENTITY = {
-    "model_name": "AXIS Q3558-LVE",
-    "category": "network_camera",
-    "subcategory": "fixed",
-    "specs": {"ip_rating": "IP66/IP67", "resolution": "4K", "fov_horizontal_deg": "104 deg"},
-    "source_url": "https://example.com/q3558",
-    "raw_summary": "Fixed 4K camera for wide-area surveillance.",
-}
-
-_PRODUCT_MARKDOWN = """\
-# AXIS Q3558-LVE
-
-## Overview
-Outstanding image quality for wide-area surveillance with ARTPEC-9 chipset.
-
-## Advanced features
-Supports AV1 compression and FIPS 140-3 encryption for enhanced security.
-
-## Technical specifications
-
-Camera
-| Sensor | Progressive scan |
-| Resolution | 4K |
-
-Video
-| Codec | H.264, H.265, AV1 |
-
-Lens
-| Horizontal FOV | 104 deg |
-
-## Analytics
-Includes AXIS Object Analytics and AXIS Video Motion Detection.
-
-## How to buy
-
-### Part numbers
-| 03206-001 | EMEA region |
-| 03207-001 | Americas |
-
-## Accessories
-Mounts and brackets — excluded from embedding.
-"""
+from rag_case_products.ingest.node_builder import build_case_nodes, build_nodes
 
 _CASE_ENTITY = {
     "title": "Surveillance at Museum of Modern Art",
@@ -91,21 +48,6 @@ Other customer stories.
 """
 
 
-def _make_product_doc() -> Document:
-    return Document(
-        text=_PRODUCT_MARKDOWN,
-        id_="prod-abc123",
-        metadata={
-            "doc_type": "product",
-            "source": _PRODUCT_ENTITY["source_url"],
-            "entity": json.dumps(_PRODUCT_ENTITY),
-            "model_name": _PRODUCT_ENTITY["model_name"],
-            "category": _PRODUCT_ENTITY["category"],
-            "subcategory": _PRODUCT_ENTITY["subcategory"],
-        },
-    )
-
-
 def _make_case_doc() -> Document:
     return Document(
         text=_CASE_MARKDOWN,
@@ -123,66 +65,6 @@ def _make_case_doc() -> Document:
     )
 
 
-# ── Product node tests ────────────────────────────────────────────────────────
-
-
-def test_product_node_kinds():
-    nodes = build_product_nodes(_make_product_doc())
-    kinds = [n.metadata["node_kind"] for n in nodes]
-    assert "card" in kinds
-    assert "prose" in kinds
-    assert "spec" in kinds
-    assert "analytics" in kinds
-    assert "procurement" in kinds
-
-
-def test_product_node_count_range():
-    nodes = build_product_nodes(_make_product_doc())
-    # SPEC §5.3: 10–14 nodes per product (card + 3-5 prose + ~10 spec + analytics + procurement)
-    # Our fixture has 2 prose, 3 spec groups, 1 analytics, 1 procurement → 8 total minimum
-    assert len(nodes) >= 6
-
-
-def test_product_accessories_excluded():
-    nodes = build_product_nodes(_make_product_doc())
-    texts = [n.text for n in nodes]
-    assert not any("Mounts and brackets" in t for t in texts)
-
-
-def test_product_card_content():
-    nodes = build_product_nodes(_make_product_doc())
-    card = next(n for n in nodes if n.metadata["node_kind"] == "card")
-    assert "AXIS Q3558-LVE" in card.text
-    assert "IP66/IP67" in card.text
-
-
-def test_product_spec_nodes_have_section_path():
-    nodes = build_product_nodes(_make_product_doc())
-    spec_nodes = [n for n in nodes if n.metadata["node_kind"] == "spec"]
-    assert len(spec_nodes) >= 1
-    for node in spec_nodes:
-        assert node.metadata["section_path"].startswith("Technical specifications")
-
-
-def test_product_nodes_carry_doc_id():
-    doc = _make_product_doc()
-    nodes = build_product_nodes(doc)
-    for node in nodes:
-        assert node.metadata["doc_id"] == doc.id_
-
-
-def test_product_nodes_carry_source():
-    nodes = build_product_nodes(_make_product_doc())
-    for node in nodes:
-        assert node.metadata["source"] == _PRODUCT_ENTITY["source_url"]
-
-
-def test_product_nodes_carry_node_kind():
-    nodes = build_product_nodes(_make_product_doc())
-    for node in nodes:
-        assert "node_kind" in node.metadata
-
-
 # ── Case node tests ───────────────────────────────────────────────────────────
 
 
@@ -197,8 +79,7 @@ def test_case_node_kinds():
 
 def test_case_node_count_range():
     nodes = build_case_nodes(_make_case_doc())
-    # SPEC §5.4: 7–9 nodes (case_card + 4-6 case_section + case_products + 0-1 case_partners)
-    # Our fixture has intro + 3 H2 sections + products + partners = 7 min
+    # case_card + intro + 3 H2 sections + case_products + case_partners = 7 min
     assert len(nodes) >= 6
 
 
@@ -251,12 +132,6 @@ def test_case_nodes_carry_source():
 
 
 # ── Dispatcher test ────────────────────────────────────────────────────────────
-
-
-def test_build_nodes_dispatches_product():
-    nodes = build_nodes(_make_product_doc())
-    kinds = {n.metadata["node_kind"] for n in nodes}
-    assert "card" in kinds
 
 
 def test_build_nodes_dispatches_case():

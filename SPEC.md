@@ -1,7 +1,6 @@
 # SPEC — RAG Prototype (LlamaIndex Workflow + Agent Hybrid)
 
-> Status: **Design draft**. This document is the agreed design for the first prototype.
-> It precedes implementation; source layout and signatures below are the build target.
+> Status: **Living document**. Updated to reflect the implemented product ingest redesign (PDF + HierarchicalNodeParser + AutoMergingRetriever).
 
 ## 1. Context
 
@@ -22,8 +21,11 @@ Three query patterns are in scope:
 |---|---|
 | Orchestration | **Workflow + tool-using Agent hybrid** |
 | Index layout | **Separate `VectorStoreIndex`** for products and case studies |
-| Data source | **HTML (URL) only**, converted to markdown via **markitdown** (PDF out of scope) |
-| Incremental ingest | Already-ingested URLs are **skipped by default**; `--force` re-ingests |
+| Product data source | **PDF datasheets** downloaded from `urls.txt`, parsed via **LlamaCloud agentic tier** |
+| Case data source | **HTML (URL)**, converted to markdown via **markitdown** |
+| Product chunking | **HierarchicalNodeParser** (2048/512/128 tokens) + **AutoMergingRetriever** |
+| Case chunking | Semantic node builder (case_card / case_section / case_products / case_partners) + contextual prefix |
+| Incremental ingest | Already-ingested URLs are **skipped by default**; `--force` re-ingests (reuses PDF/markdown cache) |
 | Completion line | End-to-end runnable from **Chainlit**, with citations and an ingest CLI; the evaluation pipeline is deferred |
 
 The goal of this prototype is a working end-to-end slice, not a feature-complete product.
@@ -49,17 +51,19 @@ The goal of this prototype is a working end-to-end slice, not a feature-complete
                                        │
             ┌──────────────────────────┴──────────────────────────┐
             ▼                                                      ▼
-   ┌──────────────────┐                                  ┌──────────────────┐
-   │ Products Index   │                                  │ Cases Index      │
-   │ VectorStore +    │                                  │ VectorStore +    │
-   │ DocStore +       │                                  │ DocStore +       │
-   │ contextual nodes │                                  │ contextual nodes │
-   └────────▲─────────┘                                  └────────▲─────────┘
+   ┌──────────────────────┐                              ┌──────────────────┐
+   │ Products Index       │                              │ Cases Index      │
+   │ VectorStore (leaves) │                              │ VectorStore +    │
+   │ DocStore (all nodes) │                              │ DocStore +       │
+   │ AutoMergingRetriever │                              │ contextual nodes │
+   └────────▲─────────────┘                              └────────▲─────────┘
             │                                                      │
    ┌────────┴───────────────────────────────────────────────────────┐
    │                  Ingest Pipeline (CLI, offline)                 │
-   │  markitdown (URL) → Entity extract → Node build → Contextual     │
-   │  prefix → text-embedding-3-small → SimpleVectorStore persist()   │
+   │  Products: PDF download → LlamaCloud parse → HierarchicalNode   │
+   │    Parser (2048/512/128) → text-embedding-3-small (leaf nodes)  │
+   │  Cases: markitdown (URL) → Entity extract → Node build →        │
+   │    Contextual prefix → text-embedding-3-small                   │
    └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -83,8 +87,11 @@ rag_case_products_llamaindex/
 ├── pyproject.toml                      # dependencies (see §9)
 ├── app.py                              # Chainlit entrypoint
 ├── data/
-│   ├── products/urls.txt               # product page URLs (1 URL per line)
-│   └── cases/urls.txt                  # case study URLs (1 URL per line)
+│   ├── products/
+│   │   ├── urls.txt                    # product datasheet PDF URLs (1 per line)
+│   │   ├── raw/                        # downloaded PDFs (gitignored)
+│   │   └── parsed/                     # LlamaCloud-parsed markdown cache (gitignored)
+│   └── cases/urls.txt                  # case study page URLs (1 URL per line)
 ├── storage/                            # persisted indices + manifest (gitignored)
 │   ├── products/
 │   │   ├── (docstore / vector_store / index_store …)
@@ -94,13 +101,14 @@ rag_case_products_llamaindex/
 │       └── manifest.json
 ├── src/rag_case_products/
 │   ├── __init__.py
-│   ├── config.py                       # Settings (model names, paths, top_k)
+│   ├── config.py                       # Settings (model names, paths, top_k, chunk sizes)
 │   ├── models.py                       # Pydantic models (§4)
 │   ├── ingest/
-│   │   ├── loaders.py                  # markitdown URL wrapper
+│   │   ├── pdf_loader.py               # PDF download + LlamaCloud parse → Document
+│   │   ├── loaders.py                  # markitdown URL wrapper (cases only)
 │   │   ├── entities.py                 # Product / CaseStudy structured extraction
-│   │   ├── node_builder.py             # node generation (card / prose / spec / …)
-│   │   ├── contextual.py               # contextual retrieval (chunk + summary)
+│   │   ├── node_builder.py             # case node generation (case_card / case_section / …)
+│   │   ├── contextual.py               # contextual retrieval for case nodes (chunk + summary)
 │   │   ├── manifest.py                 # ingest manifest read/write + skip decision
 │   │   └── pipeline.py                 # build_and_persist_indices()
 │   ├── retrieval/
@@ -221,64 +229,94 @@ class AnswerBundle(BaseModel):
 
 ### 5.1 Input
 
-- `data/products/urls.txt` (1 URL per line; lines starting with `#` are comments)
-- `data/cases/urls.txt`
+- `data/products/urls.txt` — direct PDF datasheet URLs (1 per line; `#` lines are comments).
+  Example: `https://www.axis.com/dam/public/.../datasheet-axis-q3558-lve-…-en-US.pdf`
+- `data/cases/urls.txt` — case study page URLs.
 
-PDF ingestion is out of scope for this prototype. `loaders.py` exposes a `UrlLoader`
-seam so a different loader can be swapped in later.
+Downloaded PDFs are cached in `data/products/raw/`; parsed markdown in
+`data/products/parsed/`. Both directories are gitignored.
 
 ### 5.2 Steps (CLI: `rag_case_products.cli ingest`)
+
+Steps 1 and 6–7 are shared between products and cases.
+Steps 2–5 differ by source.
 
 1. **Manifest load** (`manifest.py`, `pipeline.py`)
    - Read `storage/<name>/manifest.json` into a map `url → {ingested_at, content_hash, doc_id, node_ids}`.
    - Without `--force`: diff `urls.txt` against the manifest and process **new URLs only**.
    - With `--force`: ignore the manifest, re-ingest every URL, and delete the existing
-     nodes for each URL via `docstore.delete_document(doc_id)` before re-inserting
-     (prevents duplicates).
-   - With `--limit N`: each source's `urls.txt` is truncated to its first N URLs
-     before the manifest diff (caps products and cases independently).
-2. **Load** (`loaders.py`)
-   - `markitdown` (`MarkItDown().convert(url)`) fetches each URL and converts the HTML
-     page to markdown; the result is wrapped in a LlamaIndex `Document`.
-   - `doc.id_` is a stable URL-derived id (`sha256(url)[:16]`); `doc.metadata` gets
-     `{doc_type, source, title, fetched_at}`.
+     nodes via `index.delete_ref_doc(doc_id)` before re-inserting. PDF and markdown
+     caches are **reused** under `--force` (LlamaCloud costs; re-parse only by manually
+     deleting `data/products/parsed/`).
+   - With `--limit N`: each source's URL list is truncated to its first N entries.
+
+2. **Load**
+   - *Products* (`pdf_loader.py`): download PDF → LlamaCloud agentic parse → clean
+     markdown → `Document`. Both the PDF and the parsed markdown are cached on disk;
+     subsequent runs return the cached files without re-downloading or re-parsing.
+     `doc.id_` is `sha256(pdf_url)[:16]`; `doc.metadata` gets `{doc_type, source, fetched_at, content_hash}`.
+   - *Cases* (`loaders.py`): `markitdown` fetches the HTML page and converts it to
+     markdown. `doc.id_` is `sha256(url)[:16]`; `doc.metadata` gets
+     `{doc_type, source, title, fetched_at, content_hash}`.
+
 3. **Entity extraction** (`entities.py`)
-   - Per `doc_type`, extract a `Product` or `CaseStudy` with the `gpt-4o-mini`
-     structured output.
+   - Per `doc_type`, extract a `Product` or `CaseStudy` with `gpt-4o-mini` structured output.
    - Store as `doc.metadata["entity"]` (JSON) and copy filter keys to top-level metadata (§4.4).
-4. **Node build** (`node_builder.py`)
-   - Product → 10–14 nodes per §5.3; CaseStudy → 7–9 nodes per §5.4.
-   - Every node inherits `doc_id`, `source`, the filter keys, and a `node_kind` ∈
-     `{card, prose, spec, analytics, procurement, case_card, case_section, case_products, case_partners}`.
-   - Cascading split: only if a node exceeds ~1500 tokens, apply
+   - For products this step runs **before** chunking so that `model_name`, `category`, and
+     `subcategory` are inherited by every hierarchical node automatically.
+
+4. **Node build / chunking**
+   - *Products* (`pipeline.py`): `HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 512, 128])`
+     creates a parent → child → leaf hierarchy. All nodes inherit `doc.metadata`
+     (including entity filter keys). Heavy metadata fields (`entity`, `content_hash`,
+     `fetched_at`) are excluded from embedding and LLM rendering via
+     `excluded_embed_metadata_keys` / `excluded_llm_metadata_keys`.
+   - *Cases* (`node_builder.py`): 7–9 typed nodes per §5.4. Every node carries
+     `node_kind` ∈ `{case_card, case_section, case_products, case_partners}`.
+     Cascading split: nodes exceeding ~1500 tokens are split with
      `SentenceSplitter(chunk_size=1024, chunk_overlap=100)`.
-5. **Contextual prefix** (`contextual.py`)
-   - For each node, `gpt-4o-mini` generates a 1–2 sentence context; it is prepended
-     to `node.text`. The original body (without prefix) is kept in
-     `node.metadata["original_text"]`.
-   - The prompt only sees document excerpts (per CLAUDE.md "avoid hallucinations").
+
+5. **Contextual prefix** (`contextual.py`) — **cases only**
+   - For each case node, `gpt-4o-mini` generates a 1–2 sentence context; it is prepended
+     to `node.text`. The original body is kept in `node.metadata["original_text"]`.
+   - Product nodes do not get a contextual prefix; the hierarchical parent context serves
+     the same role during AutoMerging.
+
 6. **Embed & persist**
    - `Settings.embed_model = OpenAIEmbedding("text-embedding-3-small")`.
-   - If an index already exists, `load_index_from_storage()` then `index.insert_nodes(new_nodes)`;
-     otherwise build fresh.
+   - *Products*: **all** nodes (parent + child + leaf) are added to the docstore;
+     **only leaf nodes** are inserted into the `VectorStoreIndex` (embedded). This is
+     required for `AutoMergingRetriever` to look up parent nodes during merge.
+   - *Cases*: all nodes inserted into the index as before.
    - `storage_context.persist("storage/products")` / `"storage/cases"`.
+
 7. **Manifest update**
-   - Append `{url, content_hash, doc_id, node_ids, entity_kind, ingested_at}` per URL and write back.
-   - `content_hash` is the SHA256 of the markitdown markdown — kept for a future
-     "URL unchanged but content changed" check (currently used only for new-URL detection).
+   - Append `{url, content_hash, doc_id, node_ids, entity_kind, ingested_at}` per URL.
+   - `node_ids` records only **leaf node** IDs for products (those present in the vector index).
+   - `content_hash` is the SHA256 of the parsed markdown — reserved for future content-change detection.
 
 ### 5.3 Product chunking
 
-Grounded in a study of `https://www.axis.com/products/axis-q3558-lve`. One product URL → nodes:
+Products use `HierarchicalNodeParser` with three levels:
 
-| `node_kind` | count/product | content | purpose |
-|---|---|---|---|
-| `card` | 1 | extracted `Product` entity expanded into a template: `model_name / category / subcategory / key specs (resolution, FOV, IP rating, operating temp) / 1–2 line summary` | product identification / overview for Pattern B & C |
-| `prose` | 3–5 | upper marketing sections split per H2 ("Outstanding image quality", "ARTPEC-9 …", "Powerful video and audio analytics", "Robust with strong security") | context not in the spec table — chipset, codec (AV1), encryption (FIPS 140-3) |
-| `spec` | ~10 | "Technical specifications" split per H3 subgroup (Camera / Video / Lens / Pan-Tilt-Zoom / Compression / Audio / Network / Security / General / Sustainability); each node is ~3–5 key/value rows | pinpoint spec queries ("operating temperature?", "FOV?") |
-| `analytics` | 1 | included + supported analytics apps enumerated | Pattern C, e.g. "outdoor 4K cameras supporting Object Analytics" |
-| `procurement` | 1 | part-number table (`03206-001`, regions) | procurement queries |
-| Accessories | **0 (skip)** | 80+ navigational links — excluded from embedding | avoids inflating the corpus with noise |
+| Level | Token budget | Role |
+|---|---|---|
+| Parent | 2048 | Chapter-level context; returned by AutoMergingRetriever when multiple children match |
+| Child | 512 | Section-level |
+| Leaf | 128 | Sentence-level; the unit that is embedded and searched |
+
+The PDF datasheet markdown (from LlamaCloud agentic parse) feeds the parser directly.
+All nodes at every level carry the filter keys (`model_name`, `category`, `subcategory`,
+`source`) inherited from `doc.metadata` via entity extraction.
+
+`AutoMergingRetriever` merges retrieved leaf nodes up to their parent when enough
+sibling leaves match, returning richer context to the LLM.
+
+Note: this replaces the earlier semantic node taxonomy (`card`, `prose`, `spec`,
+`analytics`, `procurement`) and the per-node contextual prefix. The hierarchical
+structure provides equivalent recall coverage without category-specific parsing logic,
+making it straightforward to extend to all product categories (cameras, speakers,
+radar, access control) from a single PDF source.
 
 ### 5.4 Case Study chunking
 
@@ -292,18 +330,14 @@ Grounded in a study of `https://www.axis.com/customer-story/coned-drone-ptz`. On
 | `case_partners` | 0–1 | "Our partner organizations" list (standalone if ≥ 2 partners; folded into `case_card` otherwise) | ecosystem queries |
 | related stories / "Get in touch" / footer / breadcrumb | **0 (skip)** | — | excludes navigational noise |
 
-### 5.5 Contextual prefix templates
+### 5.5 Contextual prefix templates — cases only
 
 Embedding is computed once over the **prefixed** text with `text-embedding-3-small`.
 `metadata["original_text"]` holds the prefix-free body; synthesis feeds the LLM that body.
 
-Product:
-```
-[Product: {model_name} | Category: {category}/{subcategory} | Section: {section_path} | Kind: {node_kind}]
-{1-sentence chunk-level summary}
-
-{original section body}
-```
+Product nodes do **not** use a contextual prefix; `model_name` and `category` metadata
+embedded alongside the text provide identity context, and the hierarchical merge gives
+the LLM the surrounding section.
 
 Case study (H2 headings are marketing-style and semantically weak, so the prefix
 reinforces them with extracted-entity metadata):
@@ -343,11 +377,13 @@ python -m rag_case_products.cli ingest
 
 Each index is exposed as a `QueryEngineTool` for the agent:
 
-- `search_products` — products index, `similarity_top_k=8`, cross-encoder rerank to
-  `top_n=4`. Description steers the agent to use it for model specs, IP rating,
-  field of view, operating temperature, etc.
-- `search_cases` — cases index, same retrieval shape. Description steers the agent
-  toward industries, customer challenges, selected products, and outcomes.
+- `search_products` — products index with `AutoMergingRetriever`:
+  1. `index.as_retriever(similarity_top_k=8)` searches leaf nodes (128-token chunks).
+  2. `AutoMergingRetriever` promotes to parent (512 or 2048 tokens) when enough siblings match.
+  3. Cross-encoder rerank to `top_n=4`.
+  Description steers the agent to use it for model specs, IP rating, field of view, operating temperature, etc.
+- `search_cases` — cases index, `similarity_top_k=8`, cross-encoder rerank to `top_n=4`.
+  Description steers the agent toward industries, customer challenges, selected products, and outcomes.
 
 ### 6.2 Reranker (`reranker.py`)
 
@@ -424,7 +460,9 @@ dependencies = [
     "llama-index-embeddings-openai",
     "llama-index-agent-openai",            # FunctionAgent
     "llama-index-postprocessor-sbert-rerank",
-    "markitdown",
+    "llama-cloud>=2.5.0",                  # LlamaCloud agentic PDF parse
+    "markitdown",                           # case study HTML → markdown
+    "httpx",                               # PDF download
     "chainlit",
     "pydantic>=2",
     "python-dotenv",
@@ -434,8 +472,9 @@ dependencies = [
 dev-dependencies = ["ruff", "pytest"]
 ```
 
-Environment variable: `OPENAI_API_KEY`, managed via `.env`. markitdown needs no API
-key — HTML-to-markdown conversion runs locally.
+Environment variables (`.env`):
+- `OPENAI_API_KEY` — entity extraction, contextual summaries, query analysis, agent.
+- `LLAMA_CLOUD_API_KEY` — PDF agentic parsing (products only).
 
 ## 10. End-to-End Verification
 
@@ -462,9 +501,5 @@ key — HTML-to-markdown conversion runs locally.
 - Multi-vendor support.
 - Hybrid search (BM25 + vector).
 - Content-change-aware incremental ingest (using `content_hash` in `manifest.json`).
-- Non-camera product ingest (radar / network speaker / access control). The §5.3
-  chunking design is grounded in camera product pages; other categories render
-  their specs as datasheet-only links or unlabelled tables, which the camera-shaped
-  node builder cannot segment. The prototype product corpus is therefore scoped to
-  network cameras (`data/products/urls.txt`); non-camera URLs are kept commented
-  out. Generalising `node_builder` per category re-enables them.
+- `--force` re-parse from scratch: current `--force` reuses the PDF/markdown cache.
+  Full re-parse requires manual deletion of `data/products/parsed/` before `--force`.

@@ -1,12 +1,10 @@
-"""Node builder: convert a loaded Document into typed TextNodes (SPEC §5.3, §5.4).
+"""Node builder: convert a loaded Document into typed TextNodes (SPEC §5.4).
 
-Product nodes  → card / prose / spec / analytics / procurement (skip Accessories)
-Case nodes     → case_card / case_section / case_products / case_partners
-                 (skip related-stories / Get in touch / footer / breadcrumb)
+Case nodes → case_card / case_section / case_products / case_partners
+             (skip related-stories / Get in touch / footer / breadcrumb)
 
-Every node inherits doc_id, source, filter keys, and node_kind from the parent
-document.  Cascading SentenceSplitter is applied only when a node body exceeds
-~1500 tokens (SPEC §5.2 step 4).
+Product documents are now chunked via HierarchicalNodeParser in pipeline.py;
+this module only handles case study Documents.
 """
 
 from __future__ import annotations
@@ -28,7 +26,6 @@ from rag_case_products.config import (
     SENTENCE_SPLITTER_CHUNK_OVERLAP,
     SENTENCE_SPLITTER_CHUNK_SIZE,
 )
-from rag_case_products.models import DocType
 
 # Rough token estimate: 1 token ≈ 4 chars (good enough for a threshold guard).
 _CHARS_PER_TOKEN = 4
@@ -39,9 +36,8 @@ _splitter = SentenceSplitter(
     chunk_overlap=SENTENCE_SPLITTER_CHUNK_OVERLAP,
 )
 
-# Compiled once; reused by _split_by_heading for both H2 and H3 levels.
+# Compiled once; reused by _split_by_heading.
 _H2_RE = re.compile(r"^(## .+)$", re.MULTILINE)
-_H3_RE = re.compile(r"^(### .+)$", re.MULTILINE)
 # H1 heading marks the start of real page content; everything before it is
 # site-navigation chrome that markitdown includes but should not be embedded.
 _H1_RE = re.compile(r"^# .+$", re.MULTILINE)
@@ -52,15 +48,6 @@ def page_content(text: str) -> str:
     m = _H1_RE.search(text)
     return text[m.start() :] if m else text
 
-
-# ── Headings that signal the end of useful product content ──────────────────
-_PRODUCT_SKIP_H2 = {
-    "accessories",
-    "support and resources",
-    "footer menu",
-    "social menu",
-    "legal menu",
-}
 
 # ── Headings that signal the end of useful case content ─────────────────────
 # Prefix match handles trailing punctuation ("you may also be interested in...")
@@ -164,121 +151,6 @@ def _maybe_split(text: str, metadata: dict) -> list[TextNode]:
     return result
 
 
-def _split_spec_body(body: str) -> list[tuple[str, str]]:
-    """Split a 'Technical specifications' section body into (label, block) pairs.
-
-    markitdown renders the spec section as bare label lines (e.g. "Camera",
-    "Video") each followed by a markdown table block — no ### headings.  We
-    detect label lines as non-empty lines that do not start with | (table row),
-    [ (link/image), # (heading), or - (list/hr).  Each label starts a new
-    subgroup; the table rows and blank lines that follow belong to it.
-    """
-    lines = body.splitlines()
-    groups: list[tuple[str, list[str]]] = []
-    current_label = ""
-    current_lines: list[str] = []
-
-    for line in lines:
-        stripped = line.strip()
-        if stripped and not stripped.startswith(("|", "[", "#", "-")):
-            if current_lines:
-                groups.append((current_label, current_lines))
-            current_label = stripped
-            current_lines = []
-        else:
-            current_lines.append(line)
-
-    if current_lines:
-        groups.append((current_label, current_lines))
-
-    result = []
-    for label, block in groups:
-        text = "\n".join(block).strip()
-        if text:
-            result.append((label, text))
-    return result
-
-
-# ── Product node builder (SPEC §5.3) ─────────────────────────────────────────
-
-
-def _build_product_card(doc: Document, entity_json: str) -> TextNode:
-    """One card node: structured entity template for product identification."""
-    entity = json.loads(entity_json)
-    specs = entity.get("specs", {})
-
-    lines = [
-        f"Model: {entity.get('model_name', '')}",
-        f"Category: {entity.get('category', '')}",
-        f"Subcategory: {_fmt(entity.get('subcategory'))}",
-        f"Resolution: {_fmt(specs.get('resolution'))}",
-        f"FOV horizontal: {_fmt(specs.get('fov_horizontal_deg'))}",
-        f"IP rating: {_fmt(specs.get('ip_rating'))}",
-        f"Operating temperature: {_fmt(specs.get('operating_temp_c'))}",
-        "",
-        entity.get("raw_summary", ""),
-    ]
-    text = "\n".join(lines).strip()
-    meta = _base_metadata(doc, "card")
-    meta["section_path"] = "card"
-    return _make_node(text, meta)
-
-
-def build_product_nodes(doc: Document) -> list[TextNode]:
-    """Produce typed TextNodes for one product Document (SPEC §5.3)."""
-    entity_json: str = doc.metadata.get("entity", "{}")
-    sections = _split_by_heading(doc.text, _H2_RE)
-
-    nodes: list[TextNode] = []
-    nodes.append(_build_product_card(doc, entity_json))
-
-    in_tech_specs = False
-    tech_spec_body_parts: list[tuple[str, str]] = []
-
-    for heading, body in sections:
-        key = _heading_key(heading) if heading else ""
-
-        if key in _PRODUCT_SKIP_H2:
-            continue
-        if not heading:
-            continue
-
-        if key == "technical specifications":
-            in_tech_specs = True
-            tech_spec_body_parts = _split_spec_body(body)
-            continue
-
-        if key == "analytics":
-            in_tech_specs = False
-            meta = _base_metadata(doc, "analytics")
-            meta["section_path"] = heading
-            nodes.extend(_maybe_split(body, meta))
-            continue
-
-        if key == "how to buy":
-            in_tech_specs = False
-            for sub_heading, sub_body in _split_by_heading(body, _H3_RE):
-                if "part number" in sub_heading.lower() and sub_body.strip():
-                    meta = _base_metadata(doc, "procurement")
-                    meta["section_path"] = f"{heading} / {sub_heading}"
-                    nodes.extend(_maybe_split(sub_body, meta))
-            continue
-
-        if not in_tech_specs and body.strip():
-            meta = _base_metadata(doc, "prose")
-            meta["section_path"] = heading
-            nodes.extend(_maybe_split(body, meta))
-
-    for sub_heading, sub_body in tech_spec_body_parts:
-        if not sub_body.strip() or not sub_heading:
-            continue
-        meta = _base_metadata(doc, "spec")
-        meta["section_path"] = f"Technical specifications / {sub_heading}"
-        nodes.extend(_maybe_split(sub_body, meta))
-
-    return nodes
-
-
 # ── Case node builder (SPEC §5.4) ────────────────────────────────────────────
 
 
@@ -361,8 +233,5 @@ def build_case_nodes(doc: Document) -> list[TextNode]:
 
 
 def build_nodes(doc: Document) -> list[TextNode]:
-    """Build typed nodes for a Document; dispatches on doc_type."""
-    doc_type = DocType(doc.metadata.get("doc_type", DocType.PRODUCT.value))
-    if doc_type == DocType.PRODUCT:
-        return build_product_nodes(doc)
+    """Build typed nodes for a case study Document."""
     return build_case_nodes(doc)

@@ -15,6 +15,8 @@ dependencies = [
     "pydantic>=2",
     "python-dotenv",
     "sentence-transformers>=5.5.0",
+    "llama-cloud>=2.5.0",
+    "httpx",
 ]
 
 [dependency-groups]

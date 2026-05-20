@@ -1097,6 +1097,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/7e/c1/7bd34ad0ae6cfd99512f8a40b28b9624c3b1f4e1d40c9038eabc2f870b15/literalai-0.1.201.tar.gz", hash = "sha256:29e4ccadd9d68bfea319a7f0b4fc32611b081990d9195f98e5e97a14d24d3713", size = 67832, upload-time = "2025-03-24T10:01:51.559Z" }
 
 [[package]]
+name = "llama-cloud"
+version = "2.6.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4e/50/6fb33e3fa0afd8b3b6f282203a048e8c58fbefa4fccd12d253c6d3c5c948/llama_cloud-2.6.0.tar.gz", hash = "sha256:707fb0f595b813170debdba8dee146b4b68bd87d3a04cb201c9e850c28795eb6", size = 3542797, upload-time = "2026-05-19T15:40:50.449Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/88/d56fbd8d235226b70a0b34ab8247d9d927f8cc1a4a81c76aebc0dc6031cb/llama_cloud-2.6.0-py3-none-any.whl", hash = "sha256:bcffcd0560f44ac7b3008107f7680e8acfaef35f3124241199945d47fdc39238", size = 444628, upload-time = "2026-05-19T15:40:48.84Z" },
+]
+
+[[package]]
 name = "llama-index-agent-openai"
 version = "0.4.12"
 source = { registry = "https://pypi.org/simple" }
@@ -2836,6 +2853,8 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "chainlit" },
+    { name = "httpx" },
+    { name = "llama-cloud" },
     { name = "llama-index-agent-openai" },
     { name = "llama-index-core" },
     { name = "llama-index-embeddings-openai" },
@@ -2856,6 +2875,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "chainlit" },
+    { name = "httpx" },
+    { name = "llama-cloud", specifier = ">=2.5.0" },
     { name = "llama-index-agent-openai" },
     { name = "llama-index-core", specifier = ">=0.12" },
     { name = "llama-index-embeddings-openai" },
