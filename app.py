@@ -2,10 +2,25 @@
 
 import chainlit as cl
 from llama_index.core import Settings
-from llama_index.core.callbacks import CallbackManager
+from llama_index.core.callbacks import CallbackManager, CBEventType
 
 from rag_case_products.workflow.events import ProgressEvent
 from rag_case_products.workflow.rag_workflow import RagWorkflow
+
+
+class _CallbackHandler(cl.LlamaIndexCallbackHandler):
+    """LlamaIndex callback handler that suppresses noisy 'Used LLM' steps."""
+
+    def on_event_start(self, event_type, payload=None, event_id="", parent_id="", **kwargs):
+        if event_type == CBEventType.LLM:
+            return event_id
+        return super().on_event_start(event_type, payload, event_id, parent_id, **kwargs)
+
+    def on_event_end(self, event_type, payload=None, event_id="", **kwargs):
+        if event_type == CBEventType.LLM:
+            return
+        return super().on_event_end(event_type, payload, event_id, **kwargs)
+
 
 _STEP_LABELS: dict[str, str] = {
     "analyze_query": "Analyse query",
@@ -17,9 +32,10 @@ _STEP_LABELS: dict[str, str] = {
 @cl.on_chat_start
 async def on_chat_start() -> None:
     # Register the LlamaIndex callback handler before building the workflow:
-    # as_query_engine() snapshots Settings.callback_manager when RagWorkflow.__init__
-    # builds the tools, so retrieval and LLM steps surface in the UI.
-    Settings.callback_manager = CallbackManager([cl.LlamaIndexCallbackHandler()])
+    # build_tools() constructs the retrievers and query engines, which snapshot
+    # Settings.callback_manager at creation time. Registering after construction
+    # would leave retrieval and LLM sub-steps invisible in the UI.
+    Settings.callback_manager = CallbackManager([_CallbackHandler()])
     workflow = RagWorkflow(timeout=120)
     cl.user_session.set("workflow", workflow)
     await cl.Message(
@@ -27,9 +43,12 @@ async def on_chat_start() -> None:
             "Hello! I can help you search Axis Communications **products** and "
             "**deployment case studies**.\n\n"
             "Try asking:\n"
-            "- Pattern A: *Show retail case studies related to checkout monitoring.*\n"
-            "- Pattern B: *Which cameras support IP66 and IP67?*\n"
-            "- Pattern C: *What operating temperatures are common for cameras used in factories?*"
+            "- *Is there any case where axis products are used in sports stadium?*\n"
+            "- *Tell me the details optical specs about Q3556-LVE*\n"
+            "- *Please recommend cameras that can operate in environments up to 70°C*\n"
+            "- *Which M20 or P14 camera is suitable for traffic monitoring?*\n"
+            "- *Please recommend cameras meeting the requirements in manufacture factories"
+            " for accident prevention*"
         )
     ).send()
 
@@ -59,17 +78,15 @@ async def on_message(message: cl.Message) -> None:
 
     bundle = await handler
 
-    # Build citation elements from the structured list — never parse answer_markdown.
-    citation_elements = [
-        cl.Text(
-            name=f"citation-{i}",
-            content=f"**{c.title}**\n{c.source}",
-            display="inline",
-        )
-        for i, c in enumerate(bundle.citations)
-    ]
+    answer_content = bundle.answer_markdown
+    if bundle.source_items:
+        lines = ["---", "#### References"]
+        for i, item in enumerate(bundle.source_items, 1):
+            source_md = f"[link]({item.source})" if item.source else ""
+            lines.append(
+                f"{i}. **{item.title}** ({item.doc_type.value}) — {item.reason}"
+                + (f" {source_md}" if source_md else "")
+            )
+        answer_content = answer_content.rstrip("\n") + "\n\n" + "\n".join(lines)
 
-    await cl.Message(
-        content=bundle.answer_markdown,
-        elements=citation_elements,
-    ).send()
+    await cl.Message(content=answer_content).send()

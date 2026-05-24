@@ -1,8 +1,8 @@
 from llama_index.core.query_engine import RetrieverQueryEngine
-from llama_index.core.retrievers import AutoMergingRetriever
 from llama_index.core.tools import QueryEngineTool
+from llama_index.core.vector_stores.types import VectorStoreQueryMode
 
-from rag_case_products.config import SIMILARITY_TOP_K
+from rag_case_products.config import CASES_MMR_THRESHOLD, CASES_MMR_TOP_K, SIMILARITY_TOP_K
 from rag_case_products.retrieval.indices import load_cases_index, load_products_index
 from rag_case_products.retrieval.reranker import build_reranker
 
@@ -26,16 +26,20 @@ _CASES_DESCRIPTION = (
 def build_tools() -> list[QueryEngineTool]:
     reranker = build_reranker()
 
-    products_index, products_sc = load_products_index()
-    base_retriever = products_index.as_retriever(similarity_top_k=SIMILARITY_TOP_K)
-    products_retriever = AutoMergingRetriever(base_retriever, products_sc, verbose=False)
+    products_index = load_products_index()
+    products_retriever = products_index.as_retriever(similarity_top_k=SIMILARITY_TOP_K)
     products_engine = RetrieverQueryEngine.from_args(
         retriever=products_retriever,
         node_postprocessors=[reranker],
     )
 
-    cases_engine = load_cases_index().as_query_engine(
-        similarity_top_k=SIMILARITY_TOP_K,
+    cases_retriever = load_cases_index().as_retriever(
+        similarity_top_k=CASES_MMR_TOP_K,
+        vector_store_query_mode=VectorStoreQueryMode.MMR,
+        vector_store_kwargs={"mmr_threshold": CASES_MMR_THRESHOLD},
+    )
+    cases_engine = RetrieverQueryEngine.from_args(
+        retriever=cases_retriever,
         node_postprocessors=[reranker],
     )
 

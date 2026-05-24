@@ -80,13 +80,18 @@ def _extract(doc: Document, prompt_template: str, model_cls: type[_M]) -> _M:
     return entity
 
 
+_EXCLUDED_METADATA_KEYS = ["entity", "content_hash", "fetched_at", "source"]
+
+
 def extract_product(doc: Document) -> Product:
     entity = _extract(doc, _PRODUCT_PROMPT, Product)
     doc.metadata["entity"] = entity.model_dump_json()
     doc.metadata["model_name"] = entity.model_name
     doc.metadata["category"] = entity.category.value
-    doc.metadata["subcategory"] = entity.subcategory or ""
-    doc.metadata["source_url"] = entity.source_url
+    if entity.subcategory:
+        doc.metadata["subcategory"] = entity.subcategory
+    doc.excluded_embed_metadata_keys = _EXCLUDED_METADATA_KEYS
+    doc.excluded_llm_metadata_keys = _EXCLUDED_METADATA_KEYS
     return entity
 
 
@@ -95,10 +100,14 @@ def extract_case(doc: Document) -> CaseStudy:
     doc.metadata["entity"] = entity.model_dump_json()
     doc.metadata["title"] = entity.title
     doc.metadata["industry"] = entity.industry
-    doc.metadata["customer"] = entity.customer or ""
-    doc.metadata["region"] = entity.region or ""
-    doc.metadata["deployment_year"] = str(entity.deployment_year) if entity.deployment_year else ""
-    doc.metadata["source_url"] = entity.source_url
+    if entity.customer:
+        doc.metadata["customer"] = entity.customer
+    if entity.region:
+        doc.metadata["region"] = entity.region
+    if entity.deployment_year:
+        doc.metadata["deployment_year"] = entity.deployment_year
+    doc.excluded_embed_metadata_keys = _EXCLUDED_METADATA_KEYS
+    doc.excluded_llm_metadata_keys = _EXCLUDED_METADATA_KEYS
     return entity
 
 

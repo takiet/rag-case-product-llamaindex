@@ -5,7 +5,7 @@
 > data through every transformation. Line references point at the current source.
 >
 > **Note:** The product ingest path was redesigned. Products now use PDF datasheets
-> parsed by LlamaCloud + `HierarchicalNodeParser` + `AutoMergingRetriever`.
+> parsed by LlamaCloud + `MarkdownNodeParser` (one node per heading section).
 > Cases are unchanged. Sections that differ per source are labelled **(products)**
 > or **(cases)**.
 
@@ -239,42 +239,26 @@ SPEC §4.4):
 
 ## Step 4 — Node build: one `Document` → many `TextNode`s
 
-### Step 4 (products) — `pipeline.py`, `HierarchicalNodeParser`
+### Step 4 (products) — `pipeline.py`, `MarkdownNodeParser`
 
 ```python
-parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 512, 128])
-all_nodes = parser.get_nodes_from_documents([doc])
-leaf_nodes = get_leaf_nodes(all_nodes)
+md_parser = MarkdownNodeParser()
+nodes = md_parser.get_nodes_from_documents([doc])
 ```
 
-The parser creates a three-level hierarchy in a single pass:
-
-| Level | Token budget | What it contains |
-|---|---|---|
-| Parent | 2048 | A ~half-page section — chapter-level context |
-| Child | 512 | A paragraph or spec block |
-| Leaf | 128 | A few sentences — the unit that gets embedded |
-
-All nodes at every level automatically inherit `doc.metadata` (including
-`model_name`, `category`, `subcategory` written by Step 3). Heavy fields are then
-excluded from embedding and LLM rendering:
-
-```python
-for node in all_nodes:
-    node.excluded_embed_metadata_keys = ["entity", "content_hash", "fetched_at"]
-    node.excluded_llm_metadata_keys   = ["entity", "content_hash", "fetched_at"]
-```
+The parser splits the LlamaCloud-parsed markdown at heading boundaries — one
+`TextNode` per H1 or H2 section. All nodes automatically inherit `doc.metadata`
+(including `model_name`, `category`, `subcategory` written by Step 3). Heavy fields
+are already excluded from embedding and LLM rendering via `excluded_embed_metadata_keys`
+/ `excluded_llm_metadata_keys` set by `extract_product` before parsing.
 
 `model_name`, `category`, and `source` remain visible to both the embedding model
-and the LLM, providing product identity without polluting the vector with large blobs.
+and the LLM, providing product identity context in every section node.
 
-**Storage split:**
+**Storage:**
 
-- `storage_context.docstore.add_documents(all_nodes)` — registers **all** nodes.
-- `index.insert_nodes(leaf_nodes)` — embeds **only leaf nodes**.
-
-`AutoMergingRetriever` queries the vector index (leaves), then looks up parent nodes
-from the docstore when the merge threshold is met.
+- `index.insert_nodes(nodes)` — all section nodes are inserted directly into the
+  `VectorStoreIndex` and embedded.
 
 ### Step 4 (cases) — `ingest/node_builder.py`, `build_case_nodes(doc)`
 
@@ -484,36 +468,51 @@ The step writes two `ProgressEvent`s to the stream (`Analysing query…`, then
 `Pattern: B | rewrite: …`), stores `used_pattern` in the workflow `Context`, and
 emits a `QueryAnalyzedEvent`.
 
-Why this step exists: the pattern routes tool selection in Step 2, and the
-rewritten query is cleaner to embed than raw conversational text. `QueryAnalysis`
-also concentrates hallucination control at the front of the pipeline.
+Why this step exists: the rewritten query is cleaner to embed than raw
+conversational text, and hybrid queries are expanded into explicit multi-step
+retrieval instructions here so the agent in Step 2 follows them deterministically.
+`QueryAnalysis` also concentrates hallucination control at the front of the
+pipeline.
 
-> Note (Phase 4 Review, S-1): routing is **not hard-deterministic**. The pattern
-> comes from an LLM classification, and the agent in Step 2 still makes its own
-> tool-choice decision. Clear-cut queries route as expected; borderline
-> product-vs-hybrid queries may go either way.
+> Note: the `pattern` field (A/B/C) is **analytics metadata only**. Tool
+> selection in Step 2 is entirely up to the ReActAgent. Hybrid queries get
+> their multi-step plan encoded into `rewritten_query` itself (e.g. "Step 1:
+> search cases for factory deployments. Step 2: look up operating temperature
+> for those models"), so the agent's plan follows naturally from the user
+> message it receives.
 
-## Step 2 — `run_agent`: the `FunctionAgent` retrieves and reasons
+## Step 2 — `run_agent`: the `ReActAgent` retrieves and reasons
 
-`rag_workflow.py:136-181`. This is the heart of the pipeline.
+`rag_workflow.py:174-232`. This is the heart of the pipeline.
 
-### 2a. Build a pattern-aware system prompt
+### 2a. Build the system prompt
 
-`AGENT_SYSTEM_PROMPT` (`rag_workflow.py:43-58`) is formatted with the pattern, a
-pattern-specific instruction, and the hints from Step 1:
+`AGENT_SYSTEM_PROMPT` (`rag_workflow.py:54-88`) is formatted with the hints from
+Step 1 and a rich description of what `search_products` / `search_cases` cover.
+The pattern is **not** used here — the agent decides tool selection itself:
 
 ```
-Pattern B (product question): call search_products only.
-Current query pattern: B
 Hints — products: AXIS Q3558-LVE | industries: none | specs: operating temperature
 ```
 
 ### 2b. Construct the agent
 
 ```python
-agent = FunctionAgent(tools=self._tools, llm=Settings.llm, system_prompt=...)
+agent = ReActAgent(
+    tools=self._tools,
+    llm=Settings.llm,
+    system_prompt=...,
+    max_iterations=10,
+    memory=self._memory,  # shared ChatMemoryBuffer for multi-turn context
+)
 handler = agent.run(user_msg=analysis.rewritten_query)
 ```
+
+The ReActAgent runs Thought → Action → Observation cycles up to `max_iterations`
+times, calling either tool one or more times and reading each observation before
+deciding the next action. For hybrid queries with multi-step rewritten queries,
+the agent typically calls `search_cases` first to discover relevant models, then
+`search_products` to look up their specifications.
 
 `self._tools` are the two `QueryEngineTool`s from `retrieval/tools.py`:
 
@@ -527,34 +526,37 @@ IP rating, operating temperature…" for products).
 ### 2c. The agent's tool-use loop, and what one tool call does
 
 The agent (an LLM loop) reads the system prompt + user message and decides which
-tool(s) to call. For the Pattern B query it calls `search_products` once.
+tool(s) to call. For a product-only query it typically calls `search_products`
+once; for a hybrid query it follows the multi-step instructions embedded in the
+rewritten query.
 
 A single `search_products("AXIS Q3558-LVE operating temperature range")` call runs
-the full **retrieve → merge → rerank → synthesize** chain configured in `tools.py`:
+the full **retrieve → rerank → synthesize** chain configured in `tools.py`:
 
 ```
 1. EMBED      the query string with text-embedding-3-small.
-2. RETRIEVE   similarity_top_k = 8  → 8 nearest leaf nodes by cosine similarity
-              (config.py SIMILARITY_TOP_K). Leaf nodes carry model_name, category,
+2. RETRIEVE   similarity_top_k = 10 → 10 nearest section nodes by cosine similarity
+              (config.py SIMILARITY_TOP_K). Section nodes carry model_name, category,
               and source in metadata (inherited from the Document in Step 4), so
-              product-identity context is present in every vector even though the
-              text itself is a short 128-token chunk.
-3. MERGE      AutoMergingRetriever checks each retrieved leaf against its parent:
-              if enough sibling leaves were retrieved, the parent node (512 or 2048
-              tokens) is substituted. This surfaces broader context (e.g. a whole
-              spec section) when multiple nearby leaves all matched the query.
-4. RERANK     SentenceTransformerRerank("cross-encoder/ms-marco-MiniLM-L-6-v2")
-              re-scores the merged candidate set against the query and keeps
-              top_n = 4 (config.py RERANK_TOP_N). A cross-encoder reads
+              product-identity context is present in every vector.
+3. RERANK     SentenceTransformerRerank("cross-encoder/ms-marco-MiniLM-L-6-v2")
+              re-scores the candidate set against the query and keeps
+              top_n = 5 (config.py RERANK_TOP_N). A cross-encoder reads
               query+node together — sharper than bi-encoder similarity, but too
-              slow over the full index, hence "retrieve 8 cheaply, rerank to 4
+              slow over the full index, hence "retrieve 10 cheaply, rerank to 5
               precisely".
-5. SYNTHESIZE the query engine sends those 4 nodes to gpt-4o-mini and gets a
+4. SYNTHESIZE the query engine sends those 5 nodes to gpt-4o-mini and gets a
               short natural-language answer for THIS tool call.
 ```
 
+`search_cases` follows the same pattern, but step 2 uses **MMR retrieval** with
+`similarity_top_k = 30` and `mmr_threshold = 0.5` (config.py `CASES_MMR_TOP_K` /
+`CASES_MMR_THRESHOLD`) — fetching a diverse 30-candidate pool, then reranked
+down to 5. MMR widens topical coverage for case studies (where deployments span
+many industries) without ballooning the reranker workload.
+
 The tool returns that synthesised answer text to the agent **and** a
-`raw_output` `Response` object whose `source_nodes` are the 4 reranked nodes.
+`raw_output` `Response` object whose `source_nodes` are the 5 reranked nodes.
 
 ### 2d. Capturing the chunks
 
@@ -569,7 +571,8 @@ async for agent_ev in handler.stream_events():
 ```
 
 So `source_nodes` accumulates the reranked nodes from *every* tool call the agent
-made — 4 for a single-tool Pattern B query, up to 8 for a two-tool Pattern C query.
+made — typically 5 for a single-tool product/case query, and 10+ for a multi-step
+hybrid query that calls both tools (or one tool more than once).
 
 ### 2e. The agent's final answer
 
@@ -587,7 +590,7 @@ chunks)`.
 
 - `raw_answer`: "The AXIS Q3558-LVE has an operating temperature range of **-50 °C
   to 55 °C**. Source: https://www.axis.com/products/axis-q3558-lve"
-- `chunks`: 4 `RetrievedChunk`s, top one being the Q3558-LVE `card` node shown in
+- `chunks`: 5 `RetrievedChunk`s, top one being the Q3558-LVE `card` node shown in
   Step 5.
 
 ## Step 3 — `synthesize`: assemble the `AnswerBundle`
@@ -636,16 +639,19 @@ Back in `app.py:on_message`:
 
 ## The three patterns, side by side
 
-The only behavioural difference between patterns is **which tools the agent
-calls** — driven by the Step 1 classification feeding the Step 2 system prompt.
+The pattern is **classification metadata only** — the agent decides tool selection
+autonomously based on the rewritten query and the tool descriptions in the system
+prompt. The cases below describe the *typical* behaviour for each pattern, not a
+hard contract.
 
 ### Pattern A — *"Show education case studies about school surveillance upgrades."*
 
-- `analyze_query` → `pattern=A`, `industry_hints=["education"]`.
-- System prompt: "Pattern A … call search_cases only."
-- `run_agent` → agent calls **`search_cases`** once. Retrieval hits `case_card` /
-  `case_section` nodes; the Knoch School District case (`industry: education`,
-  the case study used as this part's running example) ranks high.
+- `analyze_query` → `pattern=A`, `industry_hints=["education"]`, rewritten query
+  reads as a single case-search query.
+- `run_agent` → agent typically calls **`search_cases`** once. Retrieval hits
+  `case_card` / `case_section` nodes; the Knoch School District case
+  (`industry: education`, the case study used as this part's running example)
+  ranks high.
 - `synthesize` → `AnswerBundle` with `used_pattern=A`, citations are
   `customer-story` URLs.
 
@@ -676,20 +682,24 @@ is a single spec value with one product citation.
 ### Pattern C — *"What operating temperatures are common for cameras used in factories?"*
 
 - `analyze_query` → `pattern=C`, `industry_hints=["factory"]`,
-  `spec_hints=["operating temperature"]`.
-- System prompt: "Pattern C … call BOTH tools and reconcile the results."
-- `run_agent` → agent calls **`search_cases`** (which factory deployments exist,
-  which models they used — via `case_card.referenced_models`) **and**
-  `search_products` (the `operating_temp_c` spec of those models). `source_nodes`
-  now accumulates up to 8 chunks across both tools.
+  `spec_hints=["operating temperature"]`. The rewritten query is expanded into
+  explicit multi-step instructions, e.g. *"Step 1: search case studies for factory
+  deployments to identify which camera models are used. Step 2: look up operating
+  temperature specifications for those specific camera models."*
+- `run_agent` → because the rewritten query itself spells out the plan, the
+  ReActAgent calls **`search_cases`** (which factory deployments exist, which
+  models they used — via `case_card.referenced_models`) **and** then
+  `search_products` (the `operating_temp_c` spec of those models).
+  `source_nodes` accumulates 10+ chunks across both tools.
 - The agent reconciles: it links factory case studies to the cameras they used and
   reports the operating-temperature range of those cameras, formatted as a table.
 - `synthesize` → `AnswerBundle` with `used_pattern=C`, citations from **both**
   `customer-story` and `/products/` URLs.
 
 Pattern C is the reason the architecture is an *agent* and not a fixed `if/else`:
-the "retrieve from both indices, then reconcile" loop is something the model does
-on its own inside `run_agent`.
+the multi-step "retrieve from cases, extract models, look up specs, reconcile"
+plan is encoded in the rewritten query and executed by the ReActAgent's
+Thought → Action → Observation loop.
 
 ---
 
@@ -718,16 +728,13 @@ TextNode(
   },
   relationships = {
     SOURCE: "<document id>",
-    PARENT: "<child node id>",                        # child is the 512-token parent
   },
   excluded_embed_metadata_keys = ["entity", "content_hash", "fetched_at"],
   excluded_llm_metadata_keys   = ["entity", "content_hash", "fetched_at"],
 )
 ```
 
-Parent and child nodes at higher levels (512 and 2048 tokens) have the same metadata
-and exclusion settings. `AutoMergingRetriever` may return a parent node instead of
-a leaf when enough sibling leaves matched the query.
+Each section node is a standalone unit — no parent/child relationships are tracked.
 
 ### Case node (after Steps 4, 5, and 6)
 
@@ -769,10 +776,10 @@ TextNode(
 | 2 (products) — PDF load | `ingest/pdf_loader.py` | `PdfProductLoader.load`, `download_pdf`, `parse_pdf_to_markdown` |
 | 2 (cases) — HTML load | `ingest/loaders.py` | `UrlLoader.load` |
 | 3 — entity extract | `ingest/entities.py` | `extract_product`, `extract_case` |
-| 4 (products) — hierarchical chunk | `ingest/pipeline.py` | `HierarchicalNodeParser`, `get_leaf_nodes` |
+| 4 (products) — markdown chunk | `ingest/pipeline.py` | `MarkdownNodeParser` |
 | 4 (cases) — semantic node build | `ingest/node_builder.py` | `build_case_nodes`, `_split_by_heading` |
 | 5 (cases only) — contextual prefix | `ingest/contextual.py` | `add_contextual_prefixes` |
-| 6 (products) — embed & persist | `ingest/pipeline.py` | `docstore.add_documents(all_nodes)`, `index.insert_nodes(leaf_nodes)` |
+| 6 (products) — embed & persist | `ingest/pipeline.py` | `index.insert_nodes(nodes)`, `storage_context.persist` |
 | 6 (cases) — embed & persist | `ingest/pipeline.py` | `index.insert_nodes(nodes)`, `storage_context.persist` |
 | **Query** | | |
 | UI | `app.py` | `on_chat_start`, `on_message` |
@@ -780,15 +787,15 @@ TextNode(
 | 1 — analyze | `workflow/rag_workflow.py` | `analyze_query` |
 | 2 — agent | `workflow/rag_workflow.py` | `run_agent` |
 | Tools | `retrieval/tools.py` | `build_tools` |
-| Index load (products) | `retrieval/indices.py` | `load_products_index` → `(VectorStoreIndex, StorageContext)` |
+| Index load (products) | `retrieval/indices.py` | `load_products_index` → `VectorStoreIndex` |
 | Index load (cases) | `retrieval/indices.py` | `load_cases_index` → `VectorStoreIndex` |
-| Products retriever | `retrieval/tools.py` | `AutoMergingRetriever` + `RetrieverQueryEngine` |
-| Cases retriever | `retrieval/tools.py` | `VectorStoreIndex.as_query_engine` |
+| Products retriever | `retrieval/tools.py` | `VectorStoreIndex.as_retriever` + `RetrieverQueryEngine` |
+| Cases retriever | `retrieval/tools.py` | `VectorStoreIndex.as_retriever` (MMR) + `RetrieverQueryEngine` |
 | Rerank | `retrieval/reranker.py` | `build_reranker` |
 | 3 — synthesize | `workflow/rag_workflow.py` | `synthesize` |
 | Events | `workflow/events.py` | `QueryAnalyzedEvent`, `AgentDoneEvent`, `ProgressEvent` |
 | Data models | `models.py` | `Product`, `CaseStudy`, `QueryAnalysis`, `AnswerBundle`, … |
-| Config | `config.py` | model names, paths, `SIMILARITY_TOP_K`, `RERANK_TOP_N`, `HIERARCHICAL_CHUNK_SIZES` |
+| Config | `config.py` | model names, paths, `SIMILARITY_TOP_K`, `RERANK_TOP_N`, `CASES_MMR_TOP_K` |
 
 # Appendix C — Models and tunable parameters
 
@@ -797,9 +804,10 @@ TextNode(
 | Generation LLM | `gpt-4o-mini` | `config.py LLM_MODEL` | entity extraction, summaries, analyze, agent, synthesis |
 | Embedding model | `text-embedding-3-small` | `config.py EMBED_MODEL` | node + query vectors (1536-dim) |
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` | `config.py RERANK_MODEL` | re-score retrieved nodes (CPU/MPS) |
-| `SIMILARITY_TOP_K` | 8 | `config.py` | nodes retrieved per tool call before rerank |
-| `RERANK_TOP_N` | 4 | `config.py` | nodes kept after rerank |
-| `HIERARCHICAL_CHUNK_SIZES` | `[2048, 512, 128]` | `config.py` | parent/child/leaf token budgets for product nodes |
+| `SIMILARITY_TOP_K` | 10 | `config.py` | nodes retrieved per `search_products` tool call before rerank |
+| `RERANK_TOP_N` | 5 | `config.py` | nodes kept after rerank (both tools) |
+| `CASES_MMR_TOP_K` | 30 | `config.py` | candidate pool size for `search_cases` MMR retrieval |
+| `CASES_MMR_THRESHOLD` | 0.5 | `config.py` | MMR diversity vs similarity balance (1.0=similarity, 0.0=diversity) |
 | `CONTEXTUAL_SPLIT_THRESHOLD` | ~1500 tokens | `config.py` | cascade-split a case node only above this size |
 | Entity page window | 6000 chars | `entities.py` | page text shown to the extractor |
 | Summary chunk window | 3000 chars | `contextual.py` | case chunk text shown to the summariser |

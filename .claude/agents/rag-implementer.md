@@ -60,7 +60,7 @@ guess and do not redesign on your own.
 # External API caution
 
 LlamaIndex, LlamaParse, and Chainlit APIs move fast and are easy to hallucinate.
-Before using a non-trivial API (Workflow `@step`, `FunctionAgent`, `LlamaParse`
+Before using a non-trivial API (Workflow `@step`, `ReActAgent`, `LlamaParse`
 URL input, `SentenceTransformerRerank`, structured output), verify the exact
 signature against current official docs with WebFetch/WebSearch. Do not invent
 parameters.

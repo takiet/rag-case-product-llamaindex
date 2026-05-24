@@ -1,4 +1,4 @@
-"""Tests for ingest/pdf_loader.py and the hierarchical product ingest path."""
+"""Tests for ingest/pdf_loader.py and the product node parsing path."""
 
 import hashlib
 from pathlib import Path
@@ -10,7 +10,7 @@ from llama_cloud.types.parsing_get_response import (
     MarkdownPageFailedMarkdownPage,
     MarkdownPageMarkdownResultPage,
 )
-from llama_index.core.node_parser import HierarchicalNodeParser, get_leaf_nodes
+from llama_index.core.node_parser import MarkdownNodeParser
 from llama_index.core.schema import Document
 
 from rag_case_products.ingest.pdf_loader import (
@@ -50,8 +50,8 @@ def _make_client(parse_result: MagicMock) -> MagicMock:
 
 def test_download_pdf_cache_hit(tmp_path: Path) -> None:
     pdf_url = "https://example.com/datasheet.pdf"
-    slug = hashlib.sha256(pdf_url.encode()).hexdigest()[:16]
-    cached = tmp_path / f"{slug}.pdf"
+    # download_pdf caches by URL's last path segment, not a sha-slug.
+    cached = tmp_path / "datasheet.pdf"
     cached.write_bytes(b"%PDF-1.4 cached")
 
     with patch("rag_case_products.ingest.pdf_loader.httpx.get") as mock_get:
@@ -215,7 +215,7 @@ Frame rate: Up to 30 fps
 
 
 def _make_product_doc() -> Document:
-    return Document(
+    doc = Document(
         text=_PRODUCT_MARKDOWN,
         id_="prod-test-001",
         metadata={
@@ -229,54 +229,50 @@ def _make_product_doc() -> Document:
             "fetched_at": "2026-01-01T00:00:00+00:00",
         },
     )
+    # Mirror what extract_product() sets so parser-inherited nodes carry the same exclusions.
+    _excluded = ["entity", "content_hash", "fetched_at", "source"]
+    doc.excluded_embed_metadata_keys = _excluded
+    doc.excluded_llm_metadata_keys = _excluded
+    return doc
 
 
-def test_hierarchical_nodes_inherit_product_metadata() -> None:
+def test_markdown_nodes_inherit_product_metadata() -> None:
     doc = _make_product_doc()
-    parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 512, 128])
-    all_nodes = parser.get_nodes_from_documents([doc])
-    leaf_nodes = get_leaf_nodes(all_nodes)
+    parser = MarkdownNodeParser()
+    nodes = parser.get_nodes_from_documents([doc])
 
-    assert len(leaf_nodes) > 0
-    for node in leaf_nodes:
+    assert len(nodes) > 0
+    for node in nodes:
         assert node.metadata.get("model_name") == "AXIS Q3558-LVE"
         assert node.metadata.get("category") == "network_camera"
         assert node.metadata.get("source") == "https://example.com/q3558.pdf"
 
 
-def test_hierarchical_nodes_llm_exclude_hides_entity() -> None:
+def test_markdown_nodes_llm_exclude_hides_entity() -> None:
     from llama_index.core.schema import MetadataMode
 
     doc = _make_product_doc()
-    parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 512, 128])
-    all_nodes = parser.get_nodes_from_documents([doc])
-    leaf_nodes = get_leaf_nodes(all_nodes)
+    parser = MarkdownNodeParser()
+    nodes = parser.get_nodes_from_documents([doc])
 
-    meta_excluded = ["entity", "content_hash", "fetched_at"]
-    for node in all_nodes:
-        node.excluded_embed_metadata_keys = meta_excluded
-        node.excluded_llm_metadata_keys = meta_excluded
-
-    for node in leaf_nodes:
+    for node in nodes:
         llm_content = node.get_content(metadata_mode=MetadataMode.LLM)
         assert "entity" not in llm_content
         assert "content_hash" not in llm_content
-        # model_name and source are still visible to the LLM
+        assert "source" not in llm_content
+        # model_name is still visible to the LLM
         assert "model_name" in llm_content or "AXIS Q3558-LVE" in llm_content
 
 
-def test_hierarchical_nodes_embed_exclude_hides_heavy_fields() -> None:
+def test_markdown_nodes_embed_exclude_hides_heavy_fields() -> None:
     from llama_index.core.schema import MetadataMode
 
     doc = _make_product_doc()
-    parser = HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 512, 128])
-    all_nodes = parser.get_nodes_from_documents([doc])
+    parser = MarkdownNodeParser()
+    nodes = parser.get_nodes_from_documents([doc])
 
-    meta_excluded = ["entity", "content_hash", "fetched_at"]
-    for node in all_nodes:
-        node.excluded_embed_metadata_keys = meta_excluded
-
-    for node in all_nodes:
+    for node in nodes:
         embed_content = node.get_content(metadata_mode=MetadataMode.EMBED)
         assert "content_hash" not in embed_content
         assert "fetched_at" not in embed_content
+        assert "source" not in embed_content

@@ -1,6 +1,6 @@
 # SPEC — RAG Prototype (LlamaIndex Workflow + Agent Hybrid)
 
-> Status: **Living document**. Updated to reflect the implemented product ingest redesign (PDF + HierarchicalNodeParser + AutoMergingRetriever).
+> Status: **Living document**. Updated to reflect the implemented product ingest redesign (PDF + MarkdownNodeParser).
 
 ## 1. Context
 
@@ -23,7 +23,7 @@ Three query patterns are in scope:
 | Index layout | **Separate `VectorStoreIndex`** for products and case studies |
 | Product data source | **PDF datasheets** downloaded from `urls.txt`, parsed via **LlamaCloud agentic tier** |
 | Case data source | **HTML (URL)**, converted to markdown via **markitdown** |
-| Product chunking | **HierarchicalNodeParser** (2048/512/128 tokens) + **AutoMergingRetriever** |
+| Product chunking | **MarkdownNodeParser** — one node per heading section |
 | Case chunking | Semantic node builder (case_card / case_section / case_products / case_partners) + contextual prefix |
 | Incremental ingest | Already-ingested URLs are **skipped by default**; `--force` re-ingests (reuses PDF/markdown cache) |
 | Completion line | End-to-end runnable from **Chainlit**, with citations and an ingest CLI; the evaluation pipeline is deferred |
@@ -42,7 +42,7 @@ The goal of this prototype is a working end-to-end slice, not a feature-complete
                       │              RAG Workflow                │
                       │  StartEvent                              │
                       │    └─▶ analyze_query  (LLM, Pydantic)    │
-                      │    └─▶ run_agent      (FunctionAgent)    │
+                      │    └─▶ run_agent      (ReActAgent)       │
                       │           ├─ tool: search_products       │
                       │           └─ tool: search_cases          │
                       │    └─▶ synthesize     (final answer)     │
@@ -53,15 +53,14 @@ The goal of this prototype is a working end-to-end slice, not a feature-complete
             ▼                                                      ▼
    ┌──────────────────────┐                              ┌──────────────────┐
    │ Products Index       │                              │ Cases Index      │
-   │ VectorStore (leaves) │                              │ VectorStore +    │
-   │ DocStore (all nodes) │                              │ DocStore +       │
-   │ AutoMergingRetriever │                              │ contextual nodes │
+   │ VectorStore          │                              │ VectorStore +    │
+   │ MarkdownNodeParser   │                              │ contextual nodes │
    └────────▲─────────────┘                              └────────▲─────────┘
             │                                                      │
    ┌────────┴───────────────────────────────────────────────────────┐
    │                  Ingest Pipeline (CLI, offline)                 │
-   │  Products: PDF download → LlamaCloud parse → HierarchicalNode   │
-   │    Parser (2048/512/128) → text-embedding-3-small (leaf nodes)  │
+   │  Products: PDF download → LlamaCloud parse → MarkdownNodeParser │
+   │    → text-embedding-3-small (one node per heading section)      │
    │  Cases: markitdown (URL) → Entity extract → Node build →        │
    │    Contextual prefix → text-embedding-3-small                   │
    └──────────────────────────────────────────────────────────────────┘
@@ -72,10 +71,19 @@ The goal of this prototype is a working end-to-end slice, not a feature-complete
 - The **Workflow** gives explicit, observable steps (`analyze → run_agent → synthesize`).
   This makes progress easy to surface in Chainlit via `cl.Step`, and keeps the pipeline
   debuggable and testable.
-- Retrieval is delegated to a LlamaIndex **`FunctionAgent`** that owns the
-  `search_products` / `search_cases` tools and combines them itself. Pattern C
-  ("retrieve from both and reconcile") is naturally handled by the agent's
-  tool-use loop.
+- Retrieval is delegated to a LlamaIndex **`ReActAgent`** that owns the
+  `search_products` / `search_cases` tools and combines them itself via explicit
+  Thought → Action → Observation cycles. The classified `pattern` (A/B/C) is kept
+  as analytics metadata only — the agent decides tool selection autonomously based
+  on the rewritten query and tool descriptions. Hybrid queries are pre-rewritten
+  into multi-step retrieval instructions in `analyze_query` (e.g. "Step 1: search
+  cases for factory deployments. Step 2: look up operating temperature for those
+  models"), which the ReActAgent then executes step by step.
+- A `ChatMemoryBuffer` persists across `Workflow.run()` calls within a Chainlit
+  session, so follow-up questions can resolve pronouns ("that model", "those
+  cameras") in `analyze_query` and carry conversational context into the
+  ReActAgent. The buffer is owned by `RagWorkflow` and re-instantiated per
+  `on_chat_start`, so sessions remain isolated.
 - Net effect: **deterministic frame, autonomous retrieval** — the bounded structure
   needed for the UI, with the flexibility needed for hybrid queries.
 
@@ -203,10 +211,22 @@ class CaseStudy(BaseModel):
 ### 4.3 Final output
 
 ```python
+class SourceItem(BaseModel):
+    title: str
+    doc_type: DocType
+    source: str                    # URL
+    reason: str                    # one sentence, under 25 words — constructed in code, not by LLM
+
+class SourceReasons(BaseModel):
+    # LLM-facing model: only reason strings, one per citation in order.
+    # Identity fields (title, doc_type, source) are never regenerated by the LLM.
+    reasons: list[str]
+
 class AnswerBundle(BaseModel):
     answer_markdown: str
     citations: list[Citation]
     used_pattern: QueryPattern
+    source_items: list[SourceItem] = []   # zipped from citations + SourceReasons.reasons
     # optional, filled when structured comparison is needed (UI renders as a table)
     products_compared: list[Product] | None = None
     cases_compared: list[CaseStudy] | None = None
@@ -266,10 +286,10 @@ Steps 2–5 differ by source.
      `subcategory` are inherited by every hierarchical node automatically.
 
 4. **Node build / chunking**
-   - *Products* (`pipeline.py`): `HierarchicalNodeParser.from_defaults(chunk_sizes=[2048, 512, 128])`
-     creates a parent → child → leaf hierarchy. All nodes inherit `doc.metadata`
-     (including entity filter keys). Heavy metadata fields (`entity`, `content_hash`,
-     `fetched_at`) are excluded from embedding and LLM rendering via
+   - *Products* (`pipeline.py`): `MarkdownNodeParser` splits the LlamaCloud-parsed
+     markdown at heading boundaries — one node per H1/H2 section. All nodes inherit
+     `doc.metadata` (including entity filter keys). Heavy metadata fields (`entity`,
+     `content_hash`, `fetched_at`, `source`) are excluded from embedding and LLM rendering via
      `excluded_embed_metadata_keys` / `excluded_llm_metadata_keys`.
    - *Cases* (`node_builder.py`): 7–9 typed nodes per §5.4. Every node carries
      `node_kind` ∈ `{case_card, case_section, case_products, case_partners}`.
@@ -279,44 +299,32 @@ Steps 2–5 differ by source.
 5. **Contextual prefix** (`contextual.py`) — **cases only**
    - For each case node, `gpt-4o-mini` generates a 1–2 sentence context; it is prepended
      to `node.text`. The original body is kept in `node.metadata["original_text"]`.
-   - Product nodes do not get a contextual prefix; the hierarchical parent context serves
-     the same role during AutoMerging.
+   - Product nodes do not get a contextual prefix; `model_name` and `category` metadata
+     embedded alongside the text provide identity context for every section node.
 
 6. **Embed & persist**
    - `Settings.embed_model = OpenAIEmbedding("text-embedding-3-small")`.
-   - *Products*: **all** nodes (parent + child + leaf) are added to the docstore;
-     **only leaf nodes** are inserted into the `VectorStoreIndex` (embedded). This is
-     required for `AutoMergingRetriever` to look up parent nodes during merge.
+   - *Products*: all section nodes from `MarkdownNodeParser` are inserted directly into
+     the `VectorStoreIndex` (embedded).
    - *Cases*: all nodes inserted into the index as before.
    - `storage_context.persist("storage/products")` / `"storage/cases"`.
 
 7. **Manifest update**
    - Append `{url, content_hash, doc_id, node_ids, entity_kind, ingested_at}` per URL.
-   - `node_ids` records only **leaf node** IDs for products (those present in the vector index).
    - `content_hash` is the SHA256 of the parsed markdown — reserved for future content-change detection.
 
 ### 5.3 Product chunking
 
-Products use `HierarchicalNodeParser` with three levels:
+Products use `MarkdownNodeParser`, which splits the LlamaCloud-parsed markdown at
+heading boundaries. Each H1 or H2 section becomes one node.
 
-| Level | Token budget | Role |
-|---|---|---|
-| Parent | 2048 | Chapter-level context; returned by AutoMergingRetriever when multiple children match |
-| Child | 512 | Section-level |
-| Leaf | 128 | Sentence-level; the unit that is embedded and searched |
+All nodes carry the filter keys (`model_name`, `category`, `subcategory`, `source`)
+inherited from `doc.metadata` via `extract_product` (called before parsing, so
+`MarkdownNodeParser` propagates the metadata to every child node).
 
-The PDF datasheet markdown (from LlamaCloud agentic parse) feeds the parser directly.
-All nodes at every level carry the filter keys (`model_name`, `category`, `subcategory`,
-`source`) inherited from `doc.metadata` via entity extraction.
-
-`AutoMergingRetriever` merges retrieved leaf nodes up to their parent when enough
-sibling leaves match, returning richer context to the LLM.
-
-Note: this replaces the earlier semantic node taxonomy (`card`, `prose`, `spec`,
-`analytics`, `procurement`) and the per-node contextual prefix. The hierarchical
-structure provides equivalent recall coverage without category-specific parsing logic,
-making it straightforward to extend to all product categories (cameras, speakers,
-radar, access control) from a single PDF source.
+This approach respects the document's natural section structure — major category
+headings (H1) and spec-item headings (H2) — avoiding the cross-section cuts that
+size-based chunking produces on clean markdown output.
 
 ### 5.4 Case Study chunking
 
@@ -336,8 +344,7 @@ Embedding is computed once over the **prefixed** text with `text-embedding-3-sma
 `metadata["original_text"]` holds the prefix-free body; synthesis feeds the LLM that body.
 
 Product nodes do **not** use a contextual prefix; `model_name` and `category` metadata
-embedded alongside the text provide identity context, and the hierarchical merge gives
-the LLM the surrounding section.
+embedded alongside the text provide identity context for every section node.
 
 Case study (H2 headings are marketing-style and semantically weak, so the prefix
 reinforces them with extracted-entity metadata):
@@ -377,17 +384,18 @@ python -m rag_case_products.cli ingest
 
 Each index is exposed as a `QueryEngineTool` for the agent:
 
-- `search_products` — products index with `AutoMergingRetriever`:
-  1. `index.as_retriever(similarity_top_k=8)` searches leaf nodes (128-token chunks).
-  2. `AutoMergingRetriever` promotes to parent (512 or 2048 tokens) when enough siblings match.
-  3. Cross-encoder rerank to `top_n=4`.
+- `search_products` — products index with plain vector retriever:
+  1. `index.as_retriever(similarity_top_k=10)` retrieves the 10 nearest section nodes by cosine similarity.
+  2. Cross-encoder rerank to `top_n=5`.
   Description steers the agent to use it for model specs, IP rating, field of view, operating temperature, etc.
-- `search_cases` — cases index, `similarity_top_k=8`, cross-encoder rerank to `top_n=4`.
+- `search_cases` — cases index with MMR retrieval:
+  1. `index.as_retriever(similarity_top_k=30, vector_store_query_mode=MMR, mmr_threshold=0.5)` fetches a diverse candidate pool of 30 nodes.
+  2. Cross-encoder rerank to `top_n=5`.
   Description steers the agent toward industries, customer challenges, selected products, and outcomes.
 
 ### 6.2 Reranker (`reranker.py`)
 
-`SentenceTransformerRerank(model="cross-encoder/ms-marco-MiniLM-L-6-v2", top_n=4)`.
+`SentenceTransformerRerank(model="cross-encoder/ms-marco-MiniLM-L-6-v2", top_n=5)`.
 CPU is sufficient; the model downloads once. An LLM reranker is rejected for cost
 and latency.
 
@@ -400,18 +408,22 @@ to the stream via `ctx.write_event_to_stream()` for the UI.
 class RagWorkflow(Workflow):
     @step
     async def analyze_query(self, ctx, ev: StartEvent) -> QueryAnalyzedEvent:
-        # gpt-4o-mini → structured QueryAnalysis (pattern + hints + rewritten query)
+        # gpt-4o-mini → structured QueryAnalysis
+        # (pattern A/B/C for analytics only, hints, rewritten query)
         ...
 
     @step
     async def run_agent(self, ctx, ev: QueryAnalyzedEvent) -> AgentDoneEvent:
-        agent = FunctionAgent(
+        agent = ReActAgent(
             tools=build_tools(),
             llm=OpenAI("gpt-4o-mini"),
             system_prompt=AGENT_SYSTEM_PROMPT,
+            max_iterations=10,
         )
-        # hints from QueryAnalysis are injected into the prompt;
-        # tool choice is left to the model (Pattern C → both tools)
+        # ReActAgent uses Thought→Action→Observation cycles to plan and execute
+        # multi-step retrieval autonomously. For complex queries it may call
+        # search_cases first, then use the found product names to query
+        # search_products — all without pre-defined pattern constraints.
         ...
 
     @step
@@ -437,7 +449,12 @@ class ProgressEvent(Event):       # UI-only, off the main workflow path
 
 ### 7.2 Agent system prompt — key points
 
-- Pattern A → prefer `search_cases`; Pattern B → prefer `search_products`; Pattern C → use both.
+- The agent autonomously decides which tool(s) to call and in what order.
+- `search_products` is described as a full data catalogue (optics, environmental ratings,
+  analytics capabilities, deployment traits, integration) so the agent can match queries
+  to the right retrieval context.
+- Multi-step reasoning is encouraged: find cases first, extract product names, then
+  look up their specs — or the reverse.
 - Always preserve the citation source (URL) in the answer.
 - When specs span multiple models, organize them as a table.
 - Clearly distinguish explicit specifications from inferred information (CLAUDE.md).
@@ -458,7 +475,7 @@ dependencies = [
     "llama-index-core>=0.12",
     "llama-index-llms-openai",
     "llama-index-embeddings-openai",
-    "llama-index-agent-openai",            # FunctionAgent
+    "llama-index-agent-openai",            # ReActAgent
     "llama-index-postprocessor-sbert-rerank",
     "llama-cloud>=2.5.0",                  # LlamaCloud agentic PDF parse
     "markitdown",                           # case study HTML → markdown
@@ -486,10 +503,14 @@ Environment variables (`.env`):
    ingested)" is logged and no URL is re-fetched.
 5. **Force re-ingest**: `uv run python -m rag_case_products.cli ingest --force` —
    confirm all URLs are re-fetched and old nodes are deleted then re-inserted.
-6. `uv run chainlit run app.py -w` — in the browser:
-   - Pattern A: "Show retail case studies on checkout monitoring." → only `search_cases` is called.
-   - Pattern B: "Which outdoor cameras meet IP66 and IP67?" → only `search_products` is called.
-   - Pattern C: "What operating temperature range do factory-deployed models have?" → both are called.
+6. `uv run chainlit run app.py -w` — in the browser. Tool selection is
+   autonomous (the agent chooses based on the rewritten query); the examples
+   below describe the typical, but not guaranteed, behavior:
+   - "Show retail case studies on checkout monitoring." → `search_cases` only.
+   - "Which outdoor cameras meet IP66 and IP67?" → `search_products` only.
+   - "What operating temperature range do factory-deployed models have?" →
+     `search_cases` then `search_products` (multi-step, driven by the rewritten
+     query).
 7. Confirm the answer shows citations (title + source URL).
 8. Confirm `cl.Step` surfaces analyze / agent / synthesize progress in the UI.
 9. `pytest tests/` — smoke tests pass (manifest skip decision, index load, mocked tool invocation).

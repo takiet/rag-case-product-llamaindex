@@ -18,14 +18,13 @@ from llama_index.core import (
     VectorStoreIndex,
     load_index_from_storage,
 )
-from llama_index.core.node_parser import HierarchicalNodeParser, get_leaf_nodes
+from llama_index.core.node_parser import MarkdownNodeParser
 from llama_index.embeddings.openai import OpenAIEmbedding
 
 from rag_case_products.config import (
     CASES_STORAGE,
     CASES_URLS,
     EMBED_MODEL,
-    HIERARCHICAL_CHUNK_SIZES,
     PRODUCTS_STORAGE,
     PRODUCTS_URLS,
 )
@@ -100,12 +99,8 @@ def _ingest_source(
         storage_context = StorageContext.from_defaults()
         index = VectorStoreIndex(nodes=[], storage_context=storage_context)
 
-    # Instantiate product-specific helpers only when processing the products source.
-    if doc_type == DocType.PRODUCT:
-        _pdf_loader = PdfProductLoader()
-        _hier_parser = HierarchicalNodeParser.from_defaults(chunk_sizes=HIERARCHICAL_CHUNK_SIZES)
-        # Exclude heavy / internal fields from both embedding and LLM prompt rendering.
-        _meta_excluded = ["entity", "content_hash", "fetched_at"]
+    _pdf_loader = PdfProductLoader()
+    _md_parser = MarkdownNodeParser()
 
     for url in to_process:
         log.info("[%s] ingesting: %s", name, url)
@@ -121,21 +116,12 @@ def _ingest_source(
                         log.warning("[%s] could not delete doc_id=%s (may not exist)", name, doc_id)
 
             if doc_type == DocType.PRODUCT:
-                # PDF path: fetch datasheet → LlamaCloud parse → hierarchical chunking.
-                # extract_product() writes model_name/category/subcategory into doc.metadata;
-                # HierarchicalNodeParser copies doc.metadata to every node it creates, so no
-                # manual per-node loop is needed.
                 doc = _pdf_loader.load(url)
                 entity = extract_product(doc)
                 entity_kind = type(entity).__name__
-                all_nodes = _hier_parser.get_nodes_from_documents([doc])
-                leaf_nodes = get_leaf_nodes(all_nodes)
-                for node in all_nodes:
-                    node.excluded_embed_metadata_keys = _meta_excluded
-                    node.excluded_llm_metadata_keys = _meta_excluded
-                storage_context.docstore.add_documents(all_nodes)
-                index.insert_nodes(leaf_nodes)
-                index_nodes = leaf_nodes
+                nodes = _md_parser.get_nodes_from_documents([doc])
+                index.insert_nodes(nodes)
+                index_nodes = nodes
             else:
                 # Case path: HTML via MarkItDown → semantic node builder → contextual prefixes.
                 doc = loader.load(url, doc_type)

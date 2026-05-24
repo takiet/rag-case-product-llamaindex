@@ -1,0 +1,963 @@
+[Skip to main content](#main-content)
+
+Asset 4
+
+* [Solutions](/solutions)
+
+  + [Solutions by industry](/solutions/solutions-by-industry)
+    Asset 4
+
+    [Solutions by industry](/solutions/solutions-by-industry)
+    Connected technology for all industries
+    - [Aviation](/solutions/aviation)
+    - [Banking and finance](/solutions/banking-and-finance)
+    - [Cargo and logistics](/solutions/cargo-logistics)
+    - [Casinos](/solutions/casinos)
+    - [Cities](/solutions/cities)
+    - [Commercial real estate](/solutions/commercial-real-estate)
+    - [Critical infrastructure](/solutions/critical-infrastructure)
+    - [Data centers](/solutions/data-center-security)
+    - [Education](/solutions/education)
+    - [Healthcare](/solutions/healthcare)
+    - [Hotels and restaurants](/solutions/hotels-and-restaurants)
+    - [Industrial](/solutions/industrial)
+    - [Law enforcement](/solutions/law-enforcement)
+    - [Maritime](/solutions/maritime)
+    - [Parking](/solutions/parking)
+    - [Prisons and correctional facilities](/solutions/prisons-and-correctional-facilities)
+    - [Public transport](/solutions/public-transport)
+    - [Retail](/solutions/retail)
+    - [Stadiums and venues](/solutions/stadiums-and-venues)
+    - [Traffic](/solutions/smart-network-solutions-for-traffic)
+
+    [![a man and a woman, looking at their screens](/sites/axis/files/styles/square_125x125_jpg/public/2023-12/spotlight_it_enterprise_1600x1600_.png.jpg.webp?h=063d529f&itok=L9vpcNb-)
+
+    Axis for IT teams
+
+    Integration into enterprise IT infrastructure and networks](/solutions/enterprise-it)
+    [![test](/sites/axis/files/styles/square_125x125_jpg/public/2020-11/Customer%20story%20tool%20promo%20meganav.jpg.webp?h=a76a7264&itok=d2n0LASN)
+
+    Customer stories
+
+    See our solutions at work with our customers](/customer-story)
+    [![City woman thinking connectors in the sky](/sites/axis/files/styles/square_125x125_jpg/public/2021-08/city_woman_thinking_connectors_mesh_2012_2600x2600.jpg.webp?h=1a2f67c9&itok=HNwmHhBr)
+
+    Secure Insights
+
+    Read about the latest security trends and insights](/blog/secure-insights)
+  + [Solutions by application area](/solutions/solutions-by-application-area)
+    Asset 4
+
+    [Solutions by application area](/solutions/solutions-by-application-area)
+    Solutions for every application
+    - [Audio for security](/solutions/audio-for-security)
+    - [Background music](/solutions/background-music-for-audio-solutions)
+    - [Body worn solutions](/solutions/body-worn-solutions)
+    - [Emergency response solutions](/solutions/emergency-response-solutions)
+    - [Deployable surveillance](/solutions/deployable-surveillance)
+    - [Forensic search](/solutions/forensic-search)
+    - [In-vehicle solution](/solutions/in-vehicle-solution)
+    - [License plate recognition](/solutions/license-plate-recognition)
+    - [Mobile access control solutions](/solutions/mobile-access-control-solutions)
+    - [Occupancy management and monitoring](/solutions/occupancy-management-and-monitoring)
+    - [Onboard surveillance](/solutions/onboard-surveillance)
+    - [People counting](/solutions/people-and-vehicle-counting)
+    - [Perimeter security and intrusion detection](/solutions/perimeter-security-and-intrusion-detection)
+    - [Privacy in surveillance](/solutions/privacy-in-surveillance)
+    - [Public address system](/solutions/public-address-system)
+    - [Sound detection](/solutions/sound-detection)
+    - [Vehicle access control](/solutions/vehicle-access-control)
+
+    [![Hand holding lightbulb with outdoors backlight ](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/lightbulb_hand_holding_lit_outdoors_1903_1600x1600.jpg.webp?h=00546c34&itok=qfVAbSCk)
+
+    New products
+
+    Check out our latest innovations](/products/new-products)
+    [![Axis view of cty](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/axis_view_web_1600x1600_2111.jpg.webp?h=00546c34&itok=x3BlxolD)
+
+    Products
+
+    Products for every need](/products)
+    [![test](/sites/axis/files/styles/square_125x125_jpg/public/2020-11/Customer%20story%20tool%20promo%20meganav.jpg.webp?h=a76a7264&itok=d2n0LASN)
+
+    Customer stories
+
+    See our solutions at work with our customers](/customer-story)
+  + [End-to-end solutions](/solutions/end-to-end-solutions)
+    Asset 4
+
+    [End-to-end solutions](/solutions/end-to-end-solutions)
+    End-to-end security for a smarter, safer world
+    - [Axis end-to-end solutions for access control](/solutions/axis-end-to-end-solutions-for-access-control)
+    - [Axis end-to-end solutions for audio](/products/network-audio)
+    - [Axis end-to-end solutions for body worn camera systems](/solutions/axis-end-to-end-solutions-for-body-worn-camera-systems)
+    - [Axis end-to-end solutions for surveillance](/solutions/axis-end-to-end-solutions-for-surveillance)
+
+    [![Hand holding lightbulb with outdoors backlight ](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/lightbulb_hand_holding_lit_outdoors_1903_1600x1600.jpg.webp?h=00546c34&itok=qfVAbSCk)
+
+    New products
+
+    Check out our latest innovations](/products/new-products)
+    [![Axis view of cty](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/axis_view_web_1600x1600_2111.jpg.webp?h=00546c34&itok=x3BlxolD)
+
+    Products
+
+    Products for every need](/products)
+    [![test](/sites/axis/files/styles/square_125x125_jpg/public/2020-11/Customer%20story%20tool%20promo%20meganav.jpg.webp?h=a76a7264&itok=d2n0LASN)
+
+    Customer stories
+
+    See our solutions at work with our customers](/customer-story)
+  + [Solutions by technology](/solutions/solutions-by-technology)
+    Asset 4
+
+    [Solutions by technology](/solutions/solutions-by-technology)
+    Innovation that makes a difference
+    - [Edge Vault](/solutions/edge-vault)
+    - [AV1 codec](/solutions/av1-codec)
+    - [System-on-chip](/solutions/system-on-chip)
+    - [Scene Intelligence](/solutions/scene-intelligence)
+    - [Zipstream](/solutions/zipstream)
+    - [Lightfinder](/solutions/lightfinder)
+    - [Forensic WDR](/solutions/forensic-wdr)
+    - [OptimizedIR](/solutions/optimizedir)
+    - [Image stabilization](/solutions/image-stabilization)
+    - [Thermal imaging](/solutions/thermal-imaging)
+    - [Radar](/solutions/radar)
+    - [From analog to IP](/solutions/from-analog-to-ip)
+    - [Cloud Connect](/solutions/cloud-connect)
+    - [AXIS OS](/solutions/solutions-by-technology/axis-os)
+
+    [![Hand holding lightbulb with outdoors backlight ](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/lightbulb_hand_holding_lit_outdoors_1903_1600x1600.jpg.webp?h=00546c34&itok=qfVAbSCk)
+
+    New products
+
+    Check out our latest innovations](/products/new-products)
+    [![Axis view of cty](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/axis_view_web_1600x1600_2111.jpg.webp?h=00546c34&itok=x3BlxolD)
+
+    Products
+
+    Products for every need](/products)
+    [![test](/sites/axis/files/styles/square_125x125_jpg/public/2020-11/Customer%20story%20tool%20promo%20meganav.jpg.webp?h=a76a7264&itok=d2n0LASN)
+
+    Customer stories
+
+    See our solutions at work with our customers](/customer-story)
+  + [Solutions by services](/solutions/solutions-by-services)
+    Asset 4
+
+    [Solutions by services](/solutions/solutions-by-services)
+
+    - [Managed services](/solutions/managed-services)
+    - [Professional Services](/solutions/professional-services)
+
+    [![Hand holding lightbulb with outdoors backlight ](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/lightbulb_hand_holding_lit_outdoors_1903_1600x1600.jpg.webp?h=00546c34&itok=qfVAbSCk)
+
+    New products
+
+    Check out our latest innovations](/products/new-products)
+    [![Axis view of cty](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/axis_view_web_1600x1600_2111.jpg.webp?h=00546c34&itok=x3BlxolD)
+
+    Products
+
+    Products for every need](/products)
+    [![test](/sites/axis/files/styles/square_125x125_jpg/public/2020-11/Customer%20story%20tool%20promo%20meganav.jpg.webp?h=a76a7264&itok=d2n0LASN)
+
+    Customer stories
+
+    See our solutions at work with our customers](/customer-story)
+
+  Asset 4
+* [Products](/products)
+
+  + [Product categories](/products)
+    Asset 4
+
+    [Product categories](/products)
+    A wide range of IP-based products
+    - [Network cameras](/products/network-cameras)
+    - [Network intercoms](/products/network-intercoms)
+    - [Video analytics](/products/video-analytics)
+    - [Management software](/products/management-software)
+    - [Radar devices](/products/radars)
+    - [Accessories](/products/accessories)
+    - [Access control](/products/access-control)
+    - [Network audio](/products/network-audio)
+    - [Body worn](/products/body-worn)
+    - [Storage and recorders](/products/storage-and-recorders)
+    - [System devices](/products/system-devices)
+
+    [![Hand holding lightbulb with outdoors backlight ](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/lightbulb_hand_holding_lit_outdoors_1903_1600x1600.jpg.webp?h=00546c34&itok=qfVAbSCk)
+
+    New products
+
+    Check out our latest innovations](/products/new-products)
+    [![Manhattan city streets view](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/manhattan_city_street_evening_2011_1600x1600.jpg.webp?h=00546c34&itok=PcAmNRkO)
+
+    Solutions
+
+    A solution for every need](/solutions)
+    [![A hand using a laptop while the sun is shining on the hand](/sites/axis/files/styles/square_125x125_jpg/public/2020-05/product_selector_laptop_sunlight_2003_1600x1067.png.webp?h=b60f2a6e&itok=D0h9__3Y)
+
+    Tools
+
+    Software tools to help at every stage of your project](/support/tools)
+  + [Cross-category collections](/products#cross-category-collections)
+    Asset 4
+
+    [Cross-category collections](/products#cross-category-collections)
+    Products tailored for specific needs
+    - [Explosion-protected products](/products/explosion-protected-devices)
+    - [Onboard products](/products/onboard-cameras)
+    - [Traffic products](/products/traffic-cameras-and-radars)
+
+    [![Hand holding lightbulb with outdoors backlight ](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/lightbulb_hand_holding_lit_outdoors_1903_1600x1600.jpg.webp?h=00546c34&itok=qfVAbSCk)
+
+    New products
+
+    Check out our latest innovations](/products/new-products)
+    [![Manhattan city streets view](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/manhattan_city_street_evening_2011_1600x1600.jpg.webp?h=00546c34&itok=PcAmNRkO)
+
+    Solutions
+
+    A solution for every need](/solutions)
+    [![A hand using a laptop while the sun is shining on the hand](/sites/axis/files/styles/square_125x125_jpg/public/2020-05/product_selector_laptop_sunlight_2003_1600x1067.png.webp?h=b60f2a6e&itok=D0h9__3Y)
+
+    Tools
+
+    Software tools to help at every stage of your project](/support/tools)
+
+  Asset 4
+* [Learning](/learning)
+
+  + [Axis Communications Academy](/learning#axis-communications-academy)
+    Asset 4
+
+    [Axis Communications Academy](/learning#axis-communications-academy)
+    Build expertise with industry-recognized training and learning resources from our Academy
+    - [Educational videos](/learning/academy/learning-portal/learning-localized?format%5B3308%5D=3308)
+    - [eLearning](/learning/academy/learning-portal/learning-localized?format%5B3307%5D=3307)
+    - [Virtual instructor-led training](/learning/academy/learning-portal/learning-localized?format%5B3303%5D=3303)
+    - [Instructor-led training](/learning/academy/learning-portal/learning-localized?format%5B3302%5D=3302)
+    - [Blended learning](/learning/academy/learning-portal/learning-localized?format%5B3304%5D=3304)
+    - [Webinars](/learning/academy/learning-portal/learning-localized?format%5B3306%5D=3306&format%5B3305%5D=3305)
+
+    [![Man smiling left](/sites/axis/files/styles/square_125x125_jpg/public/2022-01/man_smiling_left_2009_1600x1600.jpg.webp?h=00546c34&itok=6rkOQrEe)
+
+    Learning portal
+
+    Explore the learning portfolio.](/learning/learning-portal)
+    [![Local Academy](/sites/axis/files/styles/square_125x125_jpg/public/2022-05/MicrosoftTeams-image%20%2833%29.png.webp?h=00546c34&itok=TVPhRZSR)
+
+    Local Academy
+
+    Select your country.](/learning/academy#modal)
+    [![Man jumping with backpack](/sites/axis/files/styles/square_125x125_jpg/public/2022-01/man_jumping_stairs_backpack_1912_1600x1600.jpg.webp?h=00546c34&itok=a72CrAxf)
+
+    Axis Certification Program
+
+    Validate your network video knowledge.](/learning/axis-certification-program)
+  + [Additional knowledge resources](/learning#additional-knowledge-resources)
+    Asset 4
+
+    [Additional knowledge resources](/learning#additional-knowledge-resources)
+    Build knowledge through our wide range of resources.
+    - [White papers](/learning/white-papers)
+    - [Technical guides](/learning/technical-guides)
+
+    [![Man smiling left](/sites/axis/files/styles/square_125x125_jpg/public/2022-01/man_smiling_left_2009_1600x1600.jpg.webp?h=00546c34&itok=6rkOQrEe)
+
+    Learning portal
+
+    Explore the learning portfolio.](/learning/academy/learning-portal/learning-localized)
+    [![Father and son in the sunset biking.](/sites/axis/files/styles/square_125x125_jpg/public/2022-01/father_son_man_child_teaching_bike_bicycle_sunset_1901_1600x1600.jpg.webp?h=00546c34&itok=opRU-9zj)
+
+    Support
+
+    Assistance for products and solutions.](/support)
+    [![Circuit board](/sites/axis/files/styles/square_125x125_jpg/public/2022-01/circuit_board_processor_chip_2003_1600x1600.jpg.webp?h=00546c34&itok=15KwqRgf)
+
+    Solutions by technology
+
+    Cutting-edge technologies protecting people and businesses.](/solutions/solutions-by-technology)
+
+  Asset 4
+* [Support](/support)
+
+  + [Device software](/support/device-software)
+    Asset 4
+
+    [Device software](/support/device-software)
+    Device software releases for all our supported products
+    - [Get the latest device software](/support/device-software)
+    - [AXIS OS portal](https://help.axis.com/axis-os)
+    - [Subscribe to AXIS OS notification service](/forms/axis-os-notification-service)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [Software](/support/software)
+    Asset 4
+
+    [Software](/support/software)
+    Download software for your Axis product
+    - [Discover our software portal](/support/software)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [User manuals](/products/online-manual)
+    Asset 4
+
+    [User manuals](/products/online-manual)
+    Explore your Axis product with our easy online manuals
+    - [Visit our documentation portal](/products/online-manual)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [Tools](/support/tools)
+    Asset 4
+
+    [Tools](/support/tools)
+    Help at every stage of your project
+    - [Find and compare products](/support/tools/find-and-compare-products)
+    - [Plan and design sites](/support/tools/plan-and-design-sites)
+    - [Install and manage systems](/support/tools/install-and-manage-systems)
+    - [Canon system design tools](/support/canon-system-design-tools)
+
+    [![IP Utility – Installer setting up a camera](/sites/axis/files/styles/square_125x125_jpg/public/2022-01/ip_utility_installer_setting_up_camera_2600x2600_2201.png.webp?h=1a2f67c9&itok=0D-81TG2)
+
+    AXIS IP Utility
+
+    Easy discovery of IP address](/support/tools/axis-ip-utility)
+    [![Person on a computer programming](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/man_computer_programming_adm_montage_2010_2600x1734.jpg.webp?h=5c088d32&itok=1sazF42A)
+
+    AXIS Device Manager
+
+    Installation and management of Axis devices](/support/tools/axis-device-manager)
+    [![Hands holding a tablet with site designer on](/sites/axis/files/styles/square_125x125_jpg/public/2021-11/tablet_hands_axis_site_designer_2600x1743_2111.jpg.webp?h=d8f5c44f&itok=nbTeTaMf)
+
+    AXIS Site Designer
+
+    Faster from draft to done](/support/tools/axis-site-designer)
+  + [Repair and replace](/support/rma)
+    Asset 4
+
+    [Repair and replace](/support/rma)
+    Support, repair and replacement
+    - [RMA information and offering](/support/rma)
+    - [Europe](/support/rma/europe)
+    - [North and Central America](/support/rma/north-and-central-america)
+    - [North Asia](/support/rma/north-asia)
+    - [Africa and Middle East](/support/rma/africa-and-middle-east)
+    - [South America](/support/rma/south-america)
+    - [South Asia Pacific](/support/rma/south-asia-pacific)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [Cybersecurity](/support/cybersecurity/resources)
+    Asset 4
+
+    [Cybersecurity](/support/cybersecurity/resources)
+
+    - [Cybersecurity resources](/support/cybersecurity/resources)
+    - [Vulnerability management](/support/cybersecurity/vulnerability-management)
+    - [Subscribe to Axis security notification service](/support/cybersecurity/security-notification-service)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [Warranty](/support/warranty)
+    Asset 4
+
+    [Warranty](/support/warranty)
+    Get the most out of your investment with our 5-year warranty service
+    - [Warranty information and offering](/support/warranty)
+    - [MyInventory](/support/warranty/my-inventory)
+    - [AXIS Device Manager](/support/tools/axis-device-manager)
+    - [AXIS Device Manager Extend](/products/axis-device-manager-extend)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [FAQ](https://faq.axis.com/)
+    Asset 4
+
+    [FAQ](https://faq.axis.com/)
+    Find the answers to most frequently asked questions
+    - [Visit our FAQ portal](https://faq.axis.com/)
+    - [Glossary](/glossary)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [Troubleshooting](/support/troubleshooting)
+    Asset 4
+
+    [Troubleshooting](/support/troubleshooting)
+    Helpful tips to help solve your problem
+    - [Image quality](/support/troubleshooting/image-quality)
+    - [Pan and tilt](/support/troubleshooting/pan-and-tilt)
+    - [Streaming](/support/troubleshooting/streaming)
+    - [Network connection](/support/troubleshooting/network-connection)
+    - [Focus](/support/troubleshooting/focus)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [Video tutorials](/support/video-tutorials)
+    Asset 4
+
+    [Video tutorials](/support/video-tutorials)
+    Let our video tutorials help you with installation and configuration issues
+    - [Discover our video tutorials](/support/video-tutorials)
+    - [Watch our playlists on YouTube](https://www.youtube.com/c/AxisTechnicalSupportVideos)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+  + [Contact support](/support/contact-support)
+    Asset 4
+
+    [Contact support](/support/contact-support)
+    We will assist you wherever you are, whenever you need it
+    - [Helpdesk
+
+      (Requires MyAxis access)](/my-axis/login?destination=/support/helpdesk)
+      [Helpdesk](/support/helpdesk)
+    - [Chat
+
+      (Requires MyAxis access)](/my-axis/login?destination=/support/chat)
+      [Chat](/support/chat)
+    - [Phone
+
+      (Requires MyAxis access)](/my-axis/login?destination=/support/phone)
+      [Phone](/support/phone)
+    - [2N support](/support/2n-product-support)
+
+    [![student in classroom](/sites/axis/files/styles/square_125x125_jpg/public/2023-03/student_in_class_05_2209_1600x1600.png.webp?h=3153f809&itok=VfpgIZKq)
+
+    The Academy
+
+    Build competencies and put new skills into practice](/learning)
+    [![2N logo white and black](/sites/axis/files/styles/square_125x125_jpg/public/2023-05/2N_logo_125_125.png.webp?h=fc516ab1&itok=2MGkNviQ)
+
+    2N support page
+
+    Resources & tools for a successful installation](/support/2n-product-support)
+    [![Tablet in hands with AXIS Site Designer running](/sites/axis/files/styles/square_125x125_jpg/public/2022-06/tablet_hands_axis_site_designer_2600x1743_2111-Productimage.png.webp?h=00546c34&itok=lXWKCP6X)
+
+    AXIS Site Designer
+
+    Design your ideal solution](/support/tools/axis-site-designer)
+
+  Asset 4
+* [Partner](/partner)
+
+  + [Partner](/partner)
+    Asset 4
+
+    [Partner](/partner)
+    Whether you’re a system integrator, reseller, software or technology vendor, we have a partner program that strongly supports your goals.
+    - [Architecture & Engineering (A&E) program](/partner/a-and-e-program)
+    - [Axis Channel Partner Program](/partner/channel-partner-program)
+    - [Axis for Developers [EN]](/for-developers)
+    - [Axis Technology Integration Partner Program](/partner/technology-integration-partner-program)
+    - [Find a partner close to you](/where-to-buy)
+    - [Find and compare partner solutions](/partner-finder)
+    - [Support](/support)
+
+    [![woman shaking hands, a group of people in the background](/sites/axis/files/styles/square_125x125_jpg/public/2021-05/handshake_woman_hands_group_2009_hi_2600px.jpg.webp?h=6dbe98b1&itok=Ark0jkuD)
+
+    Already a partner?
+
+    Log in to My Business](https://mybusiness.axis.com)
+    [![a hand holding a pen, making a technical drawing](/sites/axis/files/styles/square_125x125_jpg/public/2021-05/hand_technical_drawing_1808_hi_2600px.png.webp?h=a75d079c&itok=XOSassTz)
+
+    Tools
+
+    Find tools for every step of your project](/support/tools)
+    [![architect builders wearing helmets, looking at a laptop screen](/sites/axis/files/styles/square_125x125_jpg/public/2021-06/architect_builder_hardhats_laptop_1912_2600x1950px.jpg.webp?h=616f330a&itok=RfOEfST5)
+
+    Log in to AXIS A&E Media
+
+    Log in to Axis A&E Media](https://aemedia.axis.com/)
+
+  Asset 4
+* [Where to buy](/where-to-buy)
+
+[Contact us](/contact-us)
+
+[Contact us](/contact-us)
+
+open search
+
+close search
+
+open lang
+
+Choose location
+
+open lang
+
+Choose location
+
+Global
+-
+
+* [English](/customer-story/auburn-body-worn-cameras)
+
+* North and Central America
+
+  + Canada
+     -
+    [English](/en-ca)
+    [Français](/fr-ca)
+  + Mexico
+     -
+    [Español](/es-mx)
+  + United States
+     -
+    [English](/en-us)
+  Can't find your location? Visit our [global site in English](/customer-story/auburn-body-worn-cameras).
+* South America
+
+  + Argentina
+     -
+    [Español](/es-ar)
+  + Brasil
+     -
+    [Português](/pt-br)
+  + Chile
+     -
+    [Español](/es-cl)
+  + Colombia
+     -
+    [Español](/es-co)
+  Can't find your location? Visit our [global site in English](/customer-story/auburn-body-worn-cameras).
+* Asia
+
+  + China
+     -
+    [简体中文](/zh-cn)
+  + Hong Kong
+     -
+    [English](/en-hk)
+  + India
+     -
+    [English](/en-in)
+  + Indonesia
+     -
+    [English](/en-id)
+  + Japan
+     -
+    [日本語](/ja-jp)
+  + Korea
+     -
+    [한국어](/ko-kr)
+  + Malaysia
+     -
+    [English](/en-my)
+  + Philippines
+     -
+    [English](/en-ph)
+  + Singapore
+     -
+    [English](/en-sg)
+  + Thailand
+     -
+    [ไทย](/th-th)
+  + Vietnam
+     -
+    [English](/en-vn)
+  + Taiwan
+     -
+    [繁體中文](/zh-tw)
+  + Kazakhstan
+     -
+    [Русский](/ru-kz)
+  Can't find your location? Visit our [global site in English](/customer-story/auburn-body-worn-cameras).
+* Oceania
+
+  + Australia
+     -
+    [English](/en-au)
+  + New Zealand
+     -
+    [English](/en-nz)
+  Can't find your location? Visit our [global site in English](/customer-story/auburn-body-worn-cameras).
+* Europe
+
+  + Austria
+     -
+    [Deutsch](/de-at)
+  + Belgium
+     -
+    [English](/en-be)
+    [Français](/fr-be)
+  + Czech Republic
+     -
+    [Česky](/cs-cz)
+  + Finland
+     -
+    [Suomalainen](/fi-fi)
+  + France
+     -
+    [Français](/fr-fr)
+  + Germany
+     -
+    [Deutsch](/de-de)
+  + Italy
+     -
+    [Italiano](/it-it)
+  + Netherlands
+     -
+    [Nederlands](/nl-nl)
+  + Poland
+     -
+    [Polski](/pl-pl)
+  + Portugal
+     -
+    [Português](/pt-pt)
+  + Romania
+     -
+    [Română](/ro-ro)
+  + Spain
+     -
+    [Español](/es-es)
+  + Switzerland
+     -
+    [Deutsch](/de-ch)
+    [Français](/fr-ch)
+    [Italiano](/it-ch)
+  + Sweden
+     -
+    [Svenska](/sv-se)
+  + Turkey
+     -
+    [Türkçe](/tr-tr)
+  + United Kingdom
+     -
+    [English](/en-gb)
+  + Kazakhstan
+     -
+    [Русский](/ru-kz)
+  Can't find your location? Visit our [global site in English](/customer-story/auburn-body-worn-cameras).
+* Africa and Middle East
+
+  + Kenya
+     -
+    [English](/en-ke)
+  + South Africa
+     -
+    [English](/en-za)
+  + United Arab Emirates
+     -
+    [English](/en-ae)
+    [Arabic](/ar-sa)
+  + Saudi Arabia
+     -
+    [English](/en-sa)
+    [Arabic](/ar-sa)
+  Can't find your location? Visit our [global site in English](/customer-story/auburn-body-worn-cameras).
+
+[log in](/my-axis/login)
+
+my axis menu
+
+* [My Axis](https://my.axis.com)
+* [Account settings](https://auth.axis.com/user-center/account)
+* [My Business (Partner web)](https://mybusiness.axis.com/)
+
+[Log out](/my-axis/logout)
+
+Open menu
+Close menu
+
+[Back to customer stories](/customer-story)
+
+![Close up of officer pushing button on Body Worn camera](/sites/axis/files/styles/3_2_800_x_533/public/2021-11/DSC_0060webheader.jpg.webp?h=bd854e47&itok=71AFe8vN)
+
+Cities
+
+# Securing a chronicle of corroborating evidence
+
+Organization:
+Auburn, NH, Police Department
+
+Location:
+Auburn, New Hampshire, United States
+
+Customer need:
+Personal safety,
+Public safety
+
+Auburn, New Hampshire, United States,
+2024
+
+The Auburn Police Department uses Axis body worn cameras to capture officer interactions, record on-the-street interviews, and improve accuracy of incident reports. The cameras also record eye movement that indicates a driver is impaired.
+
+---
+
+## From agriculture to bedroom community
+
+Sandwiched between the more densely populated communities of Manchester and Derry, the town of Auburn, New Hampshire is the epitome of smalltown, USA. Once mainly an agriculturally based town, Auburn now serves as a bedroom community for commuters working in Boston and other nearby metropolitan centers. The town’s scenic beauty and relaxed lifestyle offers residents a welcome respite from the busy pace of urban living, with the convenience of proximity to big city attractions when desired.
+
+"The Axis body worn cameras provide great support for our officers. They not only improve their safety on the street, but also back up their incident reports with indisputable forensic evidence. "
+
+Lt. Chip Chabot
+
+Auburn New Hampshire Police Department
+
+![Exterior of Auburn Police Department](/sites/axis/files/styles/4_3_800_x_600/public/2021-11/ExteriorofPD_web.jpg.webp?h=4a9d1e17&itok=vYYdYNMW)
+
+“Even as a small bedroom community we get our fair share of burglaries, motor vehicle and narcotics violations, criminal trespassing and things like that,” says Lt. Chip Chabot of the Auburn Police Department. “While there have been negligible complaints about the conduct of our Auburn officers, we’ve seen a general erosion in public respect for local law enforcement across the country.”
+
+When New Hampshire’s governor signed an executive order mandating that all State Police be equipped with body worn cameras and surrounding communities began adopting the policy as well, Auburn PD decided it was time to follow suit.
+
+“Ours is a small police department,” shares Lt. Chabot. “We only have 10 full-time officers and a handful of part-time officers. So, it was important that we find a body camera solution that fit our needs rather than rely on a solution better suited for a much larger police force.”
+
+![Two Auburn police officers wearing Axis body worn cameras](/sites/axis/files/styles/4_3_800_x_600/public/2021-11/DSC_0056_web.jpg.webp?h=281e29c6&itok=CrPm3aUY)
+
+## Finding a just-right system
+
+“We weren’t interested in a cloud solution,” states Lt. Chabot. “We wanted to store our video on site, disconnected from the internet, to prevent the footage from being hacked.”
+
+Extended battery life was another must. “Our officers work 12-hour shifts,” explains Lt. Chabot. “We wanted camera batteries that would last the whole shift.”
+
+Lt. Chabot compiled a checklist of other requirement as well: easy to use and easy to wear, high quality images and audio, and responsive customer support. As he investigated vendor solutions, it soon became evident that the only body worn camera system to fit the bill was from Axis.
+
+![Lt Chabot wearing body worn camera](/sites/axis/files/styles/4_3_800_x_600/public/2021-11/DSC_0053_web.jpg.webp?h=281e29c6&itok=tWd_1jbu)
+
+“When Pelmac Industries presented us with the Axis solution we knew we had a winner,” says Lt. Chabot. “The one-tap activation and the pre-recording buffer ensure that officers capture the entire incident even if there’s a delay in turning on the camera.”
+
+Lt. Chabot also appreciated the high image resolution coupled with [wide dynamic range](/solutions/forensic-wdr "Forensic WDR") sensors that enable the cameras to record quality video even in difficult lighting conditions. He liked that the dual microphones provide noise suppression to enhance the clarity of the audio track. And with the Klick Fast mounting system his officers can quickly attach and securely lock their cameras to their vests or other clothing.
+
+“Downloading video and recharging the cameras after every shift is really simple,” reports Lt. Chabot. “The officer just puts their camera in the docking station and the video automatically gets offloaded and the camera battery gets recharged. The system controller then sends the video to our AXIS Camera Station Pro video management system where it’s sorted into the officer’s digital folder so it can be easily located for review.”
+
+As a precaution against hacking, the AXIS Camera Station Pro software resides on a sequestered server that isn’t connected to the internet. When Lt. Chabot needs to send a video clip to prosecutors or defense attorneys, he offloads it to a thumb drive and sends it from another network connected computer.
+
+“We like that the video stays encrypted from the time it’s captured to when it’s offloaded and stored on the server,” says Lt. Chabot. “That extra layer of security gives us peace of mind that even if someone somehow got hold of the footage, they wouldn’t be able to access it.”
+
+The lieutenant cited other features of the system that he felt gave his officers an added measure of safety on the street. One is the ability to operate in stealth mode where the officer could turn off indicator lights and silence notification beeps and vibrations to record video covertly. Another is the camera’s ability to automatically begin recording if it detects that the officer had fallen.
+
+## Setting the record straight
+
+While body camera video plays a key role in separating legitimate complaints from false accusations, it also helps officers verify that their incident reports accurately reflect the sequence of events. “If the written report deviates from the video evidence gathered at the scene, it can raise serious doubts, and even lead to a case being thrown out,” explains Lt. Chabot.
+
+Detectives on the police force routinely use the Axis body worn cameras when interviewing witnesses at the scene. “It really helps us assist victims of crime because investigators can use the cameras to collect witness statements while incident details are still fresh in their minds,” says Lt. Chabot. “At the same time, investigators can be using the cameras to create a forensic record of what’s actually there at the scene,” he continues.
+
+## Learning to be better officers
+
+Body camera data is a great source of training content for the department. Auburn officers are encouraged to review their body camera video, notice what they’re doing right or wrong, and make adjustments accordingly.
+
+As they’ve become more familiar with the technology, officers have discovered that Axis body worn cameras are actually very effective at capturing the telltale eye movement that indicates a person has been drinking alcohol. “It’s an involuntary jerking of the eyeballs called nystagmus,” explains the lieutenant. “An officer can write about it in a report, but the statement becomes indisputable when you can see the proof on the video. Our town prosecutor is really looking forward to introducing it into court.”
+
+## Relying on a supportive partnership
+
+“While Axis offers a great solution, what clinched the deal was the outstanding customer support,” says Lt. Chabot. “Both Pelmac and Axis have been very responsive to our needs, whether it’s adjusting the one-tap button sensitivity, helping us set up login credentials for our officers, or providing a mobile app that lets officers view and attach notes to the video while they’re still in the field and events are still fresh in their memory.”
+
+[How can Axis help my department?](/solutions/cities)
+
+## Products & solutions
+
+![Woman looking out over a city](/sites/axis/files/styles/square_160x160_/public/2020-09/city_woman_looking_2003_3840x1536.jpg?itok=t8BaOaaR)
+
+#### Smart cities
+
+Make your city more livable with scalable camera and IoT solutions that address public safety, urban mobility, and environmental monitoring.
+
+[Learn more](/solutions/cities)
+
+![AXIS W800 System Controller from the left angle](/sites/axis/files/styles/square_130x130_/public/2020-05/1600_w800-angle-left-1905.png?itok=2PhxuzCC)
+
+#### AXIS W800 System Controller
+
+For cost-effective, scalable solutions
+
+[Learn more](/products/axis-w800-system-controller)
+
+![desktop screen and mobile device with video management system](/sites/axis/files/styles/square_130x130_/public/2021-03/img_acs_vms_product_selector_1850x1850_2002%20copy.png?itok=qXwy2q44)
+
+#### Video management software
+
+Easy to use – and perfect for your Axis products
+
+[Learn more](/products/video-management-software)
+
+## Our partner organizations
+
+#### Pelmac Industries
+
+[Visit website](https://www.pelmac.com/)
+
+## Get in touch
+
+Want to know how you can benefit from Axis solutions? Get in touch and we will help you.
+
+[Contact us](/contact-us?type=Contact+our+sales+team#edit-contact-message-fieldset)
+
+[To top](#top)
+
+## Footer menu
+
+* [Company](/about-axis)
+
+  + [About us](/about-axis)
+  + [Corporate governance](/about-axis/corporate-governance)
+  + [Sustainability](/about-axis/sustainability)
+  + [Cybersecurity](/about-axis/cybersecurity)
+  + [Compliance](/compliance "Compliance")
+  + [Trust Center](https://trust.axis.com/)
+  + [Privacy](/privacy)
+  + [Quality](/about-axis/quality)
+* [Contact](/contact-us)
+
+  + [Contact us](/contact-us)
+  + [Find a reseller](/where-to-buy)
+  + [Experience Center](/axis-experience-center)
+* [Careers](/careers)
+
+  + [Open positions](https://axis.wd3.myworkdayjobs.com/External_Career_Site)
+  + [Student opportunities](/careers/student-opportunities)
+  + [Learning organization](/careers/learning-organization)
+  + [Why join Axis](/careers/why-join-axis)
+  + [Blog - Life at Axis](https://lifeat.axis.com/)
+  + [Blog - Engineering at Axis](https://engineeringat.axis.com/)
+  + [Career at Axis](/careers)
+  + [What Axis people say](https://lifeat.axis.com/category/meet-the-team/)
+* [News & stories](/news-stories)
+
+  + [Newsroom](/newsroom)
+  + [Customer stories](/customer-story)
+  + [Subscribe to newsletter](/forms/security-trends-insights-newsletter)
+* [Partner](/partner)
+
+  + [Partner network](/partner)
+
+## Social menu
+
+* [Facebook](https://www.facebook.com/axiscommunications "Facebook")
+* [Linkedin](https://www.linkedin.com/company/axis-communications/?trk=fc_badge "LinkedIn")
+* [YouTube](https://www.youtube.com/axiscommunications "YouTube")
+* [X (Twitter)](https://x.com/axisipvideo "X (Twitter)")
+* [Instagram](https://www.instagram.com/axiscommunications/ "Instagram")
+
+## Legal menu
+
+© 2026 Axis Communications AB. All rights reserved.
+
+* Cookie settings
+* [Imprint](/imprint)
+* [Legal](/legal)
+* [Privacy](/privacy)

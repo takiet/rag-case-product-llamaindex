@@ -3,7 +3,7 @@
 Case nodes → case_card / case_section / case_products / case_partners
              (skip related-stories / Get in touch / footer / breadcrumb)
 
-Product documents are now chunked via HierarchicalNodeParser in pipeline.py;
+Product documents are chunked via MarkdownNodeParser in pipeline.py;
 this module only handles case study Documents.
 """
 
@@ -110,7 +110,6 @@ def _base_metadata(doc: Document, node_kind: str) -> dict:
         "model_name",
         "category",
         "subcategory",
-        "source_url",
         "industry",
         "customer",
         "deployment_year",

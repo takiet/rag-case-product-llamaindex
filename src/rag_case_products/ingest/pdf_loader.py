@@ -5,6 +5,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 from llama_cloud import LlamaCloud
@@ -29,10 +30,14 @@ def _url_slug(url: str) -> str:
     return hashlib.sha256(url.encode()).hexdigest()[:16]
 
 
+def _pdf_filename(pdf_url: str) -> str:
+    return Path(urlparse(pdf_url).path).name
+
+
 def download_pdf(pdf_url: str, cache_dir: Path = PRODUCTS_RAW_DIR) -> Path:
     """Download PDF to cache_dir. Returns local path."""
     cache_dir.mkdir(parents=True, exist_ok=True)
-    path = cache_dir / f"{_url_slug(pdf_url)}.pdf"
+    path = cache_dir / _pdf_filename(pdf_url)
     if path.exists():
         return path
     resp = httpx.get(pdf_url, follow_redirects=True, timeout=60)

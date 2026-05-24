@@ -11,8 +11,6 @@ wheels/
 
 # Project-specific
 storage/
-data/products/raw/
-data/products/parsed/
 .env
 
 # Byte-compiled / optimized / DLL files

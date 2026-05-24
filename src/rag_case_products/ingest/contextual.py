@@ -5,7 +5,7 @@ structured prefix is prepended to node.text. The prefix-free body is stored in
 node.metadata["original_text"] so the synthesis step can feed the LLM clean text
 without the prefix noise.
 
-Product nodes use HierarchicalNodeParser and do not go through this module.
+Product nodes use MarkdownNodeParser and do not go through this module.
 """
 
 from llama_index.core.schema import TextNode

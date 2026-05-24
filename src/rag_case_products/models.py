@@ -119,10 +119,32 @@ class CaseStudy(BaseModel):
 # --- Final output ---------------------------------------------------------
 
 
+class SourceItem(BaseModel):
+    title: str
+    doc_type: DocType
+    source: str
+    reason: str = Field(
+        description=(
+            "One-sentence reason (under 25 words) explaining why this source was "
+            "relevant to the user's query."
+        )
+    )
+
+
+class SourceReasons(BaseModel):
+    reasons: list[str] = Field(
+        description=(
+            "One reason string per source, in the same order as the sources listed. "
+            "Each reason must be a single sentence under 25 words."
+        )
+    )
+
+
 class AnswerBundle(BaseModel):
     answer_markdown: str
     citations: list[Citation]
     used_pattern: QueryPattern
+    source_items: list[SourceItem] = Field(default_factory=list)
     # optional, filled when structured comparison is needed (UI renders as a table)
     products_compared: list[Product] | None = None
     cases_compared: list[CaseStudy] | None = None

@@ -12,6 +12,7 @@ from rag_case_products.models import (
     QueryAnalysis,
     QueryPattern,
     RetrievedChunk,
+    SourceItem,
 )
 
 
@@ -176,3 +177,27 @@ def test_enum_values():
     assert QueryPattern.PRODUCT_SEARCH.value == "B"
     assert QueryPattern.HYBRID.value == "C"
     assert ProductCategory.NETWORK_CAMERA.value == "network_camera"
+
+
+def test_source_item_roundtrip():
+    item = SourceItem(
+        title="AXIS Q3558-LVE",
+        doc_type=DocType.PRODUCT,
+        source="https://example.com/q3558",
+        reason="This product matched the IP66 rating requirement.",
+    )
+    dumped = item.model_dump()
+    reloaded = SourceItem.model_validate(dumped)
+    assert reloaded.title == item.title
+    assert reloaded.doc_type == item.doc_type
+    assert reloaded.source == item.source
+    assert reloaded.reason == item.reason
+
+
+def test_answer_bundle_source_items_default(sample_citation):
+    bundle = AnswerBundle(
+        answer_markdown="# Answer",
+        citations=[sample_citation],
+        used_pattern=QueryPattern.CASE_SEARCH,
+    )
+    assert bundle.source_items == []
